@@ -5,94 +5,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portofolio Rahmat Jayadi</title>
     <style>
+        /* General Styling */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #e0f7fa;
-            color: #333;
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            color: #333;
         }
 
         .container {
-            max-width: 350px;
-            width: 100%;
-            background-color: #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-radius: 15px;
-            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            padding: 30px;
             text-align: center;
-            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .container:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 123, 255, 0.4), transparent 70%);
+            transform: rotate(25deg);
+            animation: rotate 6s infinite linear;
+            z-index: 0;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .profile img {
-            width: 120px;
-            height: 120px;
+            width: 130px;
+            height: 130px;
             border-radius: 50%;
-            border: 4px solid #007BFF;
             margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            border: 5px solid #74ebd5;
             transition: transform 0.3s ease;
         }
 
         .profile img:hover {
-            transform: scale(1.1);
+            transform: scale(1.1) rotate(5deg);
         }
 
         h1 {
-            font-size: 26px;
-            margin-bottom: 5px;
+            font-size: 28px;
+            margin-bottom: 10px;
             color: #007BFF;
+            z-index: 1;
+            position: relative;
         }
 
         p {
             font-size: 16px;
             line-height: 1.6;
-            margin: 5px 0;
+            margin: 10px 0;
+            position: relative;
+            z-index: 1;
         }
 
         .info {
             text-align: left;
             margin-top: 20px;
+            z-index: 1;
+            position: relative;
         }
 
         .info p {
-            font-size: 14px;
-            margin: 8px 0;
-            padding: 10px;
-            background-color: #f1f1f1;
-            border-radius: 8px;
-            transition: background-color 0.3s ease;
+            font-size: 15px;
+            margin: 12px 0;
+            padding: 12px;
+            background-color: rgba(0, 123, 255, 0.1);
+            border-radius: 12px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
         }
 
         .info p:hover {
-            background-color: #b2ebf2;
+            background-color: rgba(0, 123, 255, 0.2);
+            transform: translateX(5px);
         }
 
         .button {
-            margin-top: 20px;
+            margin-top: 30px;
             display: flex;
             justify-content: center;
+            z-index: 1;
+            position: relative;
         }
 
         .button a {
             text-decoration: none;
-            padding: 10px 20px;
+            padding: 12px 25px;
             background-color: #007BFF;
             color: #fff;
-            border-radius: 25px;
-            transition: background-color 0.3s ease;
+            border-radius: 30px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
 
         .button a:hover {
             background-color: #0056b3;
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -100,7 +131,7 @@
 
     <div class="container">
         <div class="profile">
-            <img src="https://i.imgur.com/bOIA5Xf.png">
+            <img src="https://i.imgur.com/QakTxln.png" alt="Profile Picture">
             <h1>Rahmat Jayadi</h1>
             <p>Mahasiswa Teknik Informatika</p>
         </div>
