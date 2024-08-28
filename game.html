@@ -46,8 +46,6 @@
             font-weight: bold;
         }
     </style>
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
 </head>
 <body>
 
@@ -62,48 +60,59 @@
 
     <div id="output"></div>
 
-    <py-script>
-        from itertools import permutations
-
-        def solve_cryptarithm(word1, word2, result_word):
-            letters = set(word1 + word2 + result_word)
-            if len(letters) > 10:
-                return ["Too many unique letters. Only up to 10 allowed."]
+    <script>
+        function solveCryptarithm() {
+            const word1 = document.getElementById('word1').value.toUpperCase();
+            const word2 = document.getElementById('word2').value.toUpperCase();
+            const resultWord = document.getElementById('result').value.toUpperCase();
             
-            digits = range(10)
-            solutions = []
+            const letters = new Set(word1 + word2 + resultWord);
+            if (letters.size > 10) {
+                document.getElementById('output').innerHTML = '<p>Too many unique letters. Only up to 10 allowed.</p>';
+                return;
+            }
 
-            for perm in permutations(digits, len(letters)):
-                letter_to_digit = dict(zip(letters, perm))
-                
-                # Convert words to numbers
-                num1 = sum(letter_to_digit[letter] * (10 ** i) for i, letter in enumerate(reversed(word1)))
-                num2 = sum(letter_to_digit[letter] * (10 ** i) for i, letter in enumerate(reversed(word2)))
-                result_num = sum(letter_to_digit[letter] * (10 ** i) for i, letter in enumerate(reversed(result_word)))
+            const letterArray = Array.from(letters);
+            const permutations = getPermutations(Array.from({ length: 10 }, (_, i) => i), letterArray.length);
+            const solutions = [];
 
-                # Check if the equation holds
-                if num1 + num2 == result_num and letter_to_digit[word1[0]] != 0 and letter_to_digit[word2[0]] != 0 and letter_to_digit[result_word[0]] != 0:
-                    solutions.append(f"{num1} + {num2} = {result_num}")
+            for (const perm of permutations) {
+                const letterToDigit = {};
+                for (let i = 0; i < letterArray.length; i++) {
+                    letterToDigit[letterArray[i]] = perm[i];
+                }
 
-            return solutions
+                const num1 = wordToNumber(word1, letterToDigit);
+                const num2 = wordToNumber(word2, letterToDigit);
+                const resultNum = wordToNumber(resultWord, letterToDigit);
 
-        def solveCryptarithm():
-            word1 = Element("word1").value.upper()
-            word2 = Element("word2").value.upper()
-            result_word = Element("result").value.upper()
-            solutions = solve_cryptarithm(word1, word2, result_word)
-            
-            output_element = Element("output")
-            if solutions:
-                output_html = "<table><tr><th>Possible Solutions</th></tr>"
-                for solution in solutions:
-                    output_html += f"<tr><td>{solution}</td></tr>"
-                output_html += "</table>"
-            else:
-                output_html = "<p>No solutions found.</p>"
-            
-            output_element.write(output_html)
-    </py-script>
+                if (num1 + num2 === resultNum && ![word1[0], word2[0], resultWord[0]].some(letter => letterToDigit[letter] === 0)) {
+                    solutions.push(`${num1} + ${num2} = ${resultNum}`);
+                }
+            }
+
+            document.getElementById('output').innerHTML = solutions.length 
+                ? `<table><tr><th>Possible Solutions</th></tr>${solutions.map(solution => `<tr><td>${solution}</td></tr>`).join('')}</table>`
+                : '<p>No solutions found.</p>';
+        }
+
+        function wordToNumber(word, letterToDigit) {
+            return Array.from(word).reverse().reduce((num, letter, index) => num + letterToDigit[letter] * Math.pow(10, index), 0);
+        }
+
+        function getPermutations(array, length) {
+            if (length === 1) return array.map(e => [e]);
+            const permutations = [];
+            for (let i = 0; i < array.length; i++) {
+                const item = array[i];
+                const remainingItems = array.slice(0, i).concat(array.slice(i + 1));
+                for (const perm of getPermutations(remainingItems, length - 1)) {
+                    permutations.push([item].concat(perm));
+                }
+            }
+            return permutations;
+        }
+    </script>
 
 </body>
 </html>
