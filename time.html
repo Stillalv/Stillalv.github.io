@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jam Digital Cyberpunk</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: radial-gradient(circle, #2d004d, #7f00ff);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden; /* Prevent scrollbars */
+        }
+        .clock-container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff99;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+            max-width: 90%;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+        #clock {
+            font-size: 5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        #clock.touch {
+            transform: scale(1.1);
+            color: #ff00ff;
+        }
+        #date {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+        #ampm {
+            font-size: 1.5em;
+            color: #ffcc00;
+        }
+        .day-of-week {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        .credit {
+            font-size: 0.8em;
+            color: #ddd;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .dot {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            animation: dot-blink 1s infinite;
+        }
+        @keyframes dot-blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .dot1 { top: 10%; left: 30%; width: 15px; height: 15px; }
+        .dot2 { top: 20%; left: 70%; width: 10px; height: 10px; }
+        .dot3 { top: 80%; left: 50%; width: 20px; height: 20px; }
+
+        /* Additional styles for touch effect */
+        .touch-effect {
+            position: absolute;
+            border: 2px solid #00ff99;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            opacity: 0.5;
+            pointer-events: none;
+            transform: scale(0);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .touch-effect.active {
+            transform: scale(1);
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="clock-container">
+        <div class="day-of-week" id="dayOfWeek"></div>
+        <div id="clock"></div>
+        <div id="ampm"></div>
+        <div id="date"></div>
+        <div class="touch-effect" id="touchEffect"></div>
+        <div class="dot dot1"></div>
+        <div class="dot dot2"></div>
+        <div class="dot dot3"></div>
+        <div class="credit">Credit: Uni Team</div>
+    </div>
+
+    <!-- Audio Element -->
+    <audio id="bgMusic" src="cyberpunk-music.mp3" loop autoplay></audio>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+
+            const hours24 = now.getHours();
+            const hours = hours24 % 12 || 12;
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const ampm = hours24 >= 12 ? 'PM' : 'AM';
+
+            const day = now.getDate().toString().padStart(2, '0');
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const year = now.getFullYear();
+
+            const daysOfWeek = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const dayOfWeek = daysOfWeek[now.getDay()];
+
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('ampm').textContent = ampm;
+            document.getElementById('date').textContent = `${day}/${month}/${year}`;
+            document.getElementById('dayOfWeek').textContent = dayOfWeek;
+        }
+
+        function handleTouch(event) {
+            const touchEffect = document.getElementById('touchEffect');
+            const rect = document.getElementById('clock').getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            touchEffect.style.left = `${x - 50}px`;
+            touchEffect.style.top = `${y - 50}px`;
+            touchEffect.classList.add('active');
+
+            setTimeout(() => touchEffect.classList.remove('active'), 300);
+        }
+
+        document.getElementById('clock').addEventListener('mousedown', handleTouch);
+        document.getElementById('clock').addEventListener('touchstart', handleTouch);
+
+        setInterval(updateTime, 1000);
+        updateTime(); // Call once immediately to avoid delay
+    </script>
+</body>
+</html>
