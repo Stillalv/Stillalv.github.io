@@ -7,98 +7,103 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
         }
         h1 {
-            color: #333;
+            text-align: center;
         }
-        input, button {
-            padding: 10px;
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .form-container input {
             margin: 5px;
-            font-size: 1em;
-        }
-        #result {
-            margin-top: 20px;
             padding: 10px;
-            background-color: #e0f7fa;
-            border: 1px solid #4dd0e1;
-            color: #00796b;
+            font-size: 16px;
+            text-align: center;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+        .result {
+            margin-top: 30px;
+            font-weight: bold;
         }
     </style>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
 </head>
 <body>
 
     <h1>Cryptarithm Solver</h1>
-    <input type="text" id="puzzle" placeholder="Enter puzzle (e.g., SEND + MORE = MONEY)" style="width: 80%;" />
-    <button onclick="solve()">Solve</button>
 
-    <div id="result"></div>
+    <div class="form-container">
+        <input type="text" id="word1" placeholder="Enter first word (e.g., SEND)">
+        <input type="text" id="word2" placeholder="Enter second word (e.g., MORE)">
+        <input type="text" id="result" placeholder="Enter result word (e.g., MONEY)">
+        <button onclick="solveCryptarithm()">Solve</button>
+    </div>
 
-    <script>
-        function solve() {
-            const puzzle = document.getElementById('puzzle').value.trim();
-            if (!puzzle.includes("=") || !puzzle.includes("+")) {
-                document.getElementById('result').textContent = "Invalid puzzle format. Use 'SEND + MORE = MONEY'.";
-                return;
-            }
+    <div id="output"></div>
 
-            const [leftSide, result] = puzzle.split("=");
-            const words = leftSide.split("+").map(w => w.trim());
-            const resultWord = result.trim();
+    <py-script>
+        from itertools import permutations
 
-            const letters = new Set([...words.join(""), ...resultWord]);
+        def solve_cryptarithm(word1, word2, result_word):
+            letters = set(word1 + word2 + result_word)
+            if len(letters) > 10:
+                return ["Too many unique letters. Only up to 10 allowed."]
+            
+            digits = range(10)
+            solutions = []
 
-            if (letters.size > 10) {
-                document.getElementById('result').textContent = "Too many unique letters. Cannot solve.";
-                return;
-            }
+            for perm in permutations(digits, len(letters)):
+                letter_to_digit = dict(zip(letters, perm))
+                
+                # Convert words to numbers
+                num1 = sum(letter_to_digit[letter] * (10 ** i) for i, letter in enumerate(reversed(word1)))
+                num2 = sum(letter_to_digit[letter] * (10 ** i) for i, letter in enumerate(reversed(word2)))
+                result_num = sum(letter_to_digit[letter] * (10 ** i) for i, letter in enumerate(reversed(result_word)))
 
-            const letterArray = Array.from(letters);
+                # Check if the equation holds
+                if num1 + num2 == result_num and letter_to_digit[word1[0]] != 0 and letter_to_digit[word2[0]] != 0 and letter_to_digit[result_word[0]] != 0:
+                    solutions.append(f"{num1} + {num2} = {result_num}")
 
-            const findSolution = () => {
-                const digits = Array(10).fill().map((_, i) => i);
+            return solutions
 
-                const permute = (array, n = array.length) => {
-                    if (n <= 1) return [array.slice()];
-                    return array.flatMap((_, i) =>
-                        permute(array.slice(0, i).concat(array.slice(i + 1)), n - 1).map(perm => [array[i], ...perm])
-                    );
-                };
+        def solveCryptarithm():
+            word1 = Element("word1").value.upper()
+            word2 = Element("word2").value.upper()
+            result_word = Element("result").value.upper()
+            solutions = solve_cryptarithm(word1, word2, result_word)
+            
+            output_element = Element("output")
+            if solutions:
+                output_html = "<table><tr><th>Possible Solutions</th></tr>"
+                for solution in solutions:
+                    output_html += f"<tr><td>{solution}</td></tr>"
+                output_html += "</table>"
+            else:
+                output_html = "<p>No solutions found.</p>"
+            
+            output_element.write(output_html)
+    </py-script>
 
-                const isValidSolution = (perm) => {
-                    const map = Object.fromEntries(letterArray.map((letter, i) => [letter, perm[i]]));
-                    if (words.some(word => map[word[0]] === 0 || map[resultWord[0]] === 0)) return false;
-
-                    const sumWords = words.map(word => Number(word.split('').map(letter => map[letter]).join('')));
-                    const sumResult = Number(resultWord.split('').map(letter => map[letter]).join(''));
-
-                    return sumWords.reduce((a, b) => a + b, 0) === sumResult;
-                };
-
-                for (const perm of permute(digits.slice(0, letterArray.length))) {
-                    if (isValidSolution(perm)) {
-                        return Object.fromEntries(letterArray.map((letter, i) => [letter, perm[i]]));
-                    }
-                }
-
-                return null;
-            };
-
-            const solution = findSolution();
-
-            if (solution) {
-                document.getElementById('result').textContent = `Solution: ${JSON.stringify(solution)}`;
-            } else {
-                document.getElementById('result').textContent = "No solution found.";
-            }
-        }
-    </script>
 </body>
 </html>
