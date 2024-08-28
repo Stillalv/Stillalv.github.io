@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Interaktif</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f8ff;
+            font-family: 'Arial', sans-serif;
+        }
+        .calculator {
+            width: 320px;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .display {
+            background-color: #6a5acd;
+            color: #fff;
+            font-size: 2em;
+            text-align: right;
+            padding: 20px;
+            box-sizing: border-box;
+            border-bottom: 5px solid #483d8b;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 20px;
+            background-color: #fafafa;
+        }
+        button {
+            padding: 20px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        button:nth-child(4n) {
+            background-color: #ff7f50;
+            color: #fff;
+        }
+        button:nth-child(4n):hover {
+            background-color: #ff6347;
+        }
+        button.function {
+            background-color: #ff69b4;
+            color: #fff;
+        }
+        button.function:hover {
+            background-color: #ff1493;
+        }
+        button.equals {
+            background-color: #32cd32;
+            color: #fff;
+            grid-column: span 4;
+        }
+        button.equals:hover {
+            background-color: #2e8b57;
+        }
+        button.number {
+            background-color: #87cefa;
+            color: #fff;
+        }
+        button.number:hover {
+            background-color: #4682b4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="function" onclick="clearDisplay()">C</button>
+            <button class="function" onclick="appendOperator('±')">±</button>
+            <button class="function" onclick="appendOperator('%')">%</button>
+            <button onclick="appendOperator('/')">/</button>
+
+            <button class="number" onclick="appendNumber(7)">7</button>
+            <button class="number" onclick="appendNumber(8)">8</button>
+            <button class="number" onclick="appendNumber(9)">9</button>
+            <button onclick="appendOperator('*')">*</button>
+
+            <button class="number" onclick="appendNumber(4)">4</button>
+            <button class="number" onclick="appendNumber(5)">5</button>
+            <button class="number" onclick="appendNumber(6)">6</button>
+            <button onclick="appendOperator('-')">-</button>
+
+            <button class="number" onclick="appendNumber(1)">1</button>
+            <button class="number" onclick="appendNumber(2)">2</button>
+            <button class="number" onclick="appendNumber(3)">3</button>
+            <button onclick="appendOperator('+')">+</button>
+
+            <button class="number" onclick="appendNumber(0)">0</button>
+            <button class="number" onclick="appendNumber('.')">.</button>
+            <button class="equals" onclick="calculateResult()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let displayElement = document.getElementById('display');
+        let currentInput = '';
+        let operator = '';
+        let resultDisplayed = false;
+
+        function appendNumber(number) {
+            if (resultDisplayed) {
+                currentInput = '';
+                resultDisplayed = false;
+            }
+            currentInput += number;
+            displayElement.textContent = currentInput;
+        }
+
+        function appendOperator(op) {
+            if (op === '±') {
+                currentInput = (parseFloat(currentInput) * -1).toString();
+                displayElement.textContent = currentInput;
+            } else if (op === '%') {
+                currentInput = (parseFloat(currentInput) / 100).toString();
+                displayElement.textContent = currentInput;
+            } else {
+                operator = op;
+                currentInput += ` ${op} `;
+                displayElement.textContent = currentInput;
+            }
+        }
+
+        function clearDisplay() {
+            currentInput = '';
+            operator = '';
+            displayElement.textContent = '0';
+        }
+
+        function calculateResult() {
+            try {
+                currentInput = eval(currentInput.replace('×', '*').replace('÷', '/')).toString();
+                displayElement.textContent = currentInput;
+                resultDisplayed = true;
+            } catch (error) {
+                displayElement.textContent = 'Error';
+            }
+        }
+    </script>
+</body>
+</html>
