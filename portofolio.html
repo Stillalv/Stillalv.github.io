@@ -105,6 +105,7 @@
             border-radius: 10px;
             padding: 2rem;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
         .about-content {
             display: flex;
@@ -164,6 +165,9 @@
 
         /* Responsive design */
         @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
             .nav-toggle {
                 display: block;
             }
@@ -187,6 +191,14 @@
             .about-content {
                 flex-direction: column;
                 text-align: center;
+            }
+            .about-image {
+                width: 150px;
+                height: 150px;
+                margin-bottom: 1rem;
+            }
+            .about-text p {
+                font-size: 1rem;
             }
         }
     </style>
@@ -262,7 +274,7 @@
 
                 const targetId = this.getAttribute('href');
                 const targetElement = document.querySelector(targetId);
-                
+
                 if (targetElement) {
                     targetElement.scrollIntoView({
                         behavior: 'smooth'
