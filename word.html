@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word & Character Counter</title>
+  <style>
+    /* Reset and base styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #fff;
+    }
+    .container {
+      width: 90%;
+      max-width: 500px;
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      color: #2575fc;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      border: 2px solid #2575fc;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 1rem;
+      resize: vertical;
+      box-sizing: border-box;
+      outline: none;
+      transition: border 0.3s ease;
+    }
+
+    textarea:focus {
+      border-color: #6a11cb;
+    }
+
+    .results {
+      margin-top: 15px;
+      display: flex;
+      justify-content: space-between;
+      background: #f4f4f4;
+      padding: 10px 15px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+
+    .results div {
+      font-size: 1rem;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    footer a {
+      color: #2575fc;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Word & Character Counter</h1>
+    <textarea id="textInput" placeholder="Type your text here..." oninput="updateCounts()"></textarea>
+    <div class="results">
+      <div><strong>Words:</strong> <span id="wordCount">0</span></div>
+      <div><strong>Characters:</strong> <span id="charCount">0</span></div>
+    </div>
+    <footer>
+      Made with ❤️ by <a href="https://github.com/Stillalv" target="_blank">Stillalv</a>
+    </footer>
+  </div>
+
+  <script>
+    function updateCounts() {
+      const text = document.getElementById("textInput").value;
+
+      // Count words (split by space or newline, filter out empty elements)
+      const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+
+      // Count characters (excluding whitespace)
+      const characters = text.replace(/\s/g, '');
+
+      // Update the results
+      document.getElementById("wordCount").textContent = words.length;
+      document.getElementById("charCount").textContent = characters.length;
+    }
+  </script>
+</body>
+</html>
