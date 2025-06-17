@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Esports Tournament Maker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    .input-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .input-group input, .input-group select, .input-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 15px;
+      margin-top: 10px;
+      background: #007bff;
+      color: #fff;
+      text-align: center;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .button:hover {
+      background: #0056b3;
+    }
+    .team-list {
+      margin-top: 20px;
+    }
+    .team-list ul {
+      list-style: none;
+      padding: 0;
+    }
+    .team-list li {
+      background: #f9f9f9;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Esports Tournament Maker</h1>
+
+    <div class="input-group">
+      <label for="tournament-name">Tournament Name</label>
+      <input type="text" id="tournament-name" placeholder="Enter tournament name">
+    </div>
+
+    <div class="input-group">
+      <label for="tournament-type">Tournament Type</label>
+      <select id="tournament-type">
+        <option value="group">Group Stage</option>
+        <option value="playoff">Playoffs</option>
+        <option value="swiss">Swiss</option>
+        <option value="combined">Combined</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label for="team-name">Add Team</label>
+      <input type="text" id="team-name" placeholder="Enter team name">
+      <input type="text" id="team-country" placeholder="Enter team country">
+    </div>
+    <button class="button" onclick="addTeam()">Add Team</button>
+
+    <div class="team-list">
+      <h3>Teams</h3>
+      <ul id="team-list"></ul>
+    </div>
+
+    <button class="button" onclick="generateTournament()">Generate Tournament</button>
+
+    <div id="output"></div>
+  </div>
+
+  <script>
+    const teams = [];
+
+    function addTeam() {
+      const teamName = document.getElementById('team-name').value;
+      const teamCountry = document.getElementById('team-country').value;
+
+      if (teamName && teamCountry) {
+        teams.push({ name: teamName, country: teamCountry });
+        document.getElementById('team-name').value = '';
+        document.getElementById('team-country').value = '';
+        updateTeamList();
+      } else {
+        alert('Please fill out both fields');
+      }
+    }
+
+    function updateTeamList() {
+      const teamList = document.getElementById('team-list');
+      teamList.innerHTML = '';
+      teams.forEach((team, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${team.name} (${team.country})`;
+        teamList.appendChild(li);
+      });
+    }
+
+    function generateTournament() {
+      const tournamentName = document.getElementById('tournament-name').value;
+      const tournamentType = document.getElementById('tournament-type').value;
+      const output = document.getElementById('output');
+
+      if (!tournamentName || teams.length === 0) {
+        alert('Please enter a tournament name and add at least one team');
+        return;
+      }
+
+      output.innerHTML = `
+        <h2>${tournamentName}</h2>
+        <p>Type: ${tournamentType}</p>
+        <h3>Teams:</h3>
+        <ul>
+          ${teams.map(team => `<li>${team.name} (${team.country})</li>`).join('')}
+        </ul>
+      `;
+    }
+  </script>
+</body>
+</html>
