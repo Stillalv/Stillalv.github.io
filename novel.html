@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembaca Novel Responsif</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Variabel CSS untuk mode terang/gelap */
+        :root {
+            --bg-color: #f7fafc; /* light-gray-100 */
+            --text-color: #1a202c; /* gray-900 */
+            --primary-button-bg: #4299e1; /* blue-500 */
+            --primary-button-hover-bg: #3182ce; /* blue-600 */
+            --control-bg: #edf2f7; /* gray-200 */
+            --control-border: #e2e8f0; /* gray-300 */
+        }
+        .dark-mode {
+            --bg-color: #1a202c; /* gray-900 */
+            --text-color: #e2e8f0; /* gray-200 */
+            --primary-button-bg: #63b3ed; /* blue-300 */
+            --primary-button-hover-bg: #4299e1; /* blue-500 */
+            --control-bg: #2d3748; /* gray-800 */
+            --control-border: #4a5568; /* gray-700 */
+        }
+
+        /* Styling dasar Body dan Konten Novel */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+            line-height: 1.8; /* Meningkatkan keterbacaan */
+            scroll-behavior: smooth; /* Auto-scroll lebih halus */
+        }
+        #novel-content {
+            padding: 2.5rem 1.5rem; /* Default padding for mobile */
+            text-align: justify;
+            white-space: pre-wrap; /* Mempertahankan spasi dan baris baru */
+            word-wrap: break-word; /* Memastikan kata tidak terpotong */
+            max-width: 800px; /* Lebar maksimum untuk keterbacaan optimal */
+            margin: 0 auto; /* Tengah konten */
+            font-size: 1rem; /* Default font size */
+            transition: font-size 0.2s ease-in-out;
+        }
+
+        /* Styling Kontrol Atas (Sticky Header) */
+        .controls {
+            position: sticky;
+            top: 0;
+            padding: 1rem;
+            background-color: var(--control-bg);
+            border-bottom: 1px solid var(--control-border);
+            display: flex;
+            flex-wrap: wrap; /* Untuk responsif pada layar kecil */
+            gap: 0.75rem; /* Gap antar elemen */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Shadow halus */
+            transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+        }
+        
+        /* Styling Umum untuk Tombol dan Select */
+        .controls button, .controls select, .controls label {
+            padding: 0.75rem 1.25rem; /* Increased padding for better touch targets */
+            border: 1px solid var(--control-border);
+            border-radius: 0.5rem; /* rounded-lg */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            font-weight: 500; /* Medium weight */
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            outline: none; /* Hilangkan outline default */
+        }
+        .controls button:hover, .controls select:hover {
+            background-color: var(--control-border);
+        }
+        .controls button:active {
+            transform: translateY(1px); /* Efek klik */
+        }
+        
+        /* Styling untuk Tombol Primer (Pilih Novel) */
+        .controls #upload-container button {
+            background-color: var(--primary-button-bg);
+            color: white;
+            border-color: var(--primary-button-bg);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .controls #upload-container button:hover {
+            background-color: var(--primary-button-hover-bg);
+            border-color: var(--primary-button-hover-bg);
+            box-shadow: 0 6px 8px -2px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Styling untuk Select List Novel */
+        #novel-list {
+            margin-right: 0.5rem;
+            min-width: 150px; /* Lebar minimum untuk dropdown */
+        }
+
+        /* Styling untuk Input File (Disembunyikan secara visual) */
+        #upload-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        #upload-container input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Responsifitas untuk layar lebih kecil dari 768px (mobile) */
+        @media (max-width: 767px) {
+            .controls {
+                flex-direction: column; /* Tata letak kolom pada layar kecil */
+                padding: 0.75rem;
+                gap: 0.5rem;
+            }
+            .controls button, .controls select, .controls label {
+                width: 100%; /* Penuh lebar pada layar kecil */
+                text-align: center;
+                margin: 0 !important; /* Override margin dari gap */
+            }
+            #novel-list {
+                margin-right: 0;
+            }
+            #novel-content {
+                padding: 1.5rem 1rem; /* Kurangi padding pada mobile */
+            }
+        }
+
+        /* Responsifitas untuk layar antara 768px dan 1023px (tablet) */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            #novel-content {
+                padding: 2rem 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <div id="upload-container" class="relative">
+            <button class="relative bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                Pilih Novel (.txt)
+            </button>
+            <input type="file" id="novel-upload" multiple accept=".txt" class="absolute inset-0 opacity-0 cursor-pointer">
+        </div>
+        <select id="novel-list" class="hidden"></select>
+        
+        <button id="font-size-decrease" class="flex items-center justify-center font-bold text-lg">A-</button>
+        <button id="font-size-increase" class="flex items-center justify-center font-bold text-lg">A+</button>
+        
+        <button id="dark-mode-toggle" class="flex items-center justify-center">
+            <span class="mr-2 text-xl leading-none">🌙</span> Mode Gelap
+        </button>
+        <button id="autoscroll-toggle" class="flex items-center justify-center">
+            <span class="mr-2 text-xl leading-none">⬇️</span> Mulai Auto-Scroll
+        </button>
+    </div>
+
+    <div id="novel-content" class="text-gray-900 dark:text-gray-200">
+        <p>Selamat datang di pembaca novel Anda. Silakan unggah file novel (.txt) untuk memulai.</p>
+    </div>
+
+    <script>
+        const novelUpload = document.getElementById('novel-upload');
+        const novelList = document.getElementById('novel-list');
+        const novelContent = document.getElementById('novel-content');
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const autoscrollToggle = document.getElementById('autoscroll-toggle');
+        const fontSizeDecrease = document.getElementById('font-size-decrease');
+        const fontSizeIncrease = document.getElementById('font-size-increase');
+        
+        let novelFiles = [];
+        let currentFontSize = parseFloat(localStorage.getItem('novelFontSize')) || 16;
+        let autoscrollInterval = null;
+        let autoscrollSpeed = 50; // Milidetik per 1 pixel scroll. Semakin kecil = semakin cepat
+
+        // Inisialisasi ukuran font
+        novelContent.style.fontSize = `${currentFontSize}px`;
+
+        // Inisialisasi Dark Mode dari localStorage
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.innerHTML = '<span class="mr-2 text-xl leading-none">☀️</span> Mode Terang';
+        } else {
+            darkModeToggle.innerHTML = '<span class="mr-2 text-xl leading-none">🌙</span> Mode Gelap';
+        }
+
+        // --- Fitur Multi-Upload dan Tampilan Novel ---
+        novelUpload.addEventListener('change', (event) => {
+            novelFiles = Array.from(event.target.files).filter(file => file.name.endsWith('.txt'));
+            novelList.innerHTML = ''; // Bersihkan daftar sebelumnya
+            
+            if (novelFiles.length > 0) {
+                novelList.classList.remove('hidden'); // Tampilkan dropdown
+                novelList.classList.add('inline-block');
+                // Urutkan file berdasarkan nama secara numerik
+                novelFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+
+                novelFiles.forEach((file, i) => {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = file.name;
+                    novelList.appendChild(option);
+                });
+                loadNovel(0); // Muat novel pertama secara default
+            } else {
+                novelList.classList.add('hidden'); // Sembunyikan dropdown jika tidak ada file
+                novelList.classList.remove('inline-block');
+                novelContent.textContent = 'Selamat datang di pembaca novel Anda. Silakan unggah file novel (.txt) untuk memulai.';
+            }
+        });
+
+        novelList.addEventListener('change', (event) => {
+            const index = event.target.value;
+            loadNovel(index);
+        });
+
+        function loadNovel(index) {
+            const file = novelFiles[index];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    novelContent.textContent = e.target.result;
+                    window.scrollTo(0, 0); // Gulir ke atas setiap kali novel baru dimuat
+                    // Hentikan auto-scroll jika sedang aktif saat memuat novel baru
+                    if (autoscrollInterval) {
+                        clearInterval(autoscrollInterval);
+                        autoscrollInterval = null;
+                        autoscrollToggle.innerHTML = '<span class="mr-2 text-xl leading-none">⬇️</span> Mulai Auto-Scroll';
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // --- Fitur Font Size ---
+        fontSizeDecrease.addEventListener('click', () => changeFontSize(-1));
+        fontSizeIncrease.addEventListener('click', () => changeFontSize(1));
+
+        function changeFontSize(sizeChange) {
+            currentFontSize = Math.max(10, Math.min(30, currentFontSize + sizeChange)); // Batasi ukuran font dari 10px hingga 30px
+            novelContent.style.fontSize = `${currentFontSize}px`;
+            localStorage.setItem('novelFontSize', currentFontSize); // Simpan preferensi font size
+        }
+        
+        // --- Fitur Dark Mode ---
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                darkModeToggle.innerHTML = '<span class="mr-2 text-xl leading-none">☀️</span> Mode Terang';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                darkModeToggle.innerHTML = '<span class="mr-2 text-xl leading-none">🌙</span> Mode Gelap';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        });
+
+        // --- Fitur Auto Scroll ---
+        autoscrollToggle.addEventListener('click', () => {
+            if (autoscrollInterval) {
+                clearInterval(autoscrollInterval);
+                autoscrollInterval = null;
+                autoscrollToggle.innerHTML = '<span class="mr-2 text-xl leading-none">⬇️</span> Mulai Auto-Scroll';
+            } else {
+                autoscrollToggle.innerHTML = '<span class="mr-2 text-xl leading-none">⏸️</span> Stop Auto-Scroll';
+                autoscrollInterval = setInterval(() => {
+                    window.scrollBy(0, 1); // Scroll 1 pixel setiap `autoscrollSpeed` ms
+                    // Jika mencapai akhir halaman, hentikan auto-scroll
+                    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) { // Sedikit margin toleransi
+                        clearInterval(autoscrollInterval);
+                        autoscrollInterval = null;
+                        autoscrollToggle.innerHTML = '<span class="mr-2 text-xl leading-none">⬇️</span> Mulai Auto-Scroll';
+                    }
+                }, autoscrollSpeed); 
+            }
+        });
+    </script>
+</body>
+</html>
