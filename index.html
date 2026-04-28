@@ -1,159 +1,191 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PSG vs Bayern München</title>
+  <title>Sports Stream Hub</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      overflow: hidden;
-    }
+    * {
+      box-sizing: border-box;
+    }body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom, #0a0a0a, #18181b);
+  color: white;
+  min-height: 100vh;
+}
 
-    .player-container {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-    }
+header {
+  text-align: center;
+  padding: 20px;
+  font-size: 2rem;
+  font-weight: bold;
+}
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+button {
+  background: #27272a;
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #3f3f46;
+}
+
+.match-card {
+  background: #27272a;
+  padding: 20px;
+  border-radius: 15px;
+  cursor: pointer;
+}
+
+.match-card:hover {
+  background: #3f3f46;
+}
+
+iframe {
+  width: 100%;
+  height: 70vh;
+  border: none;
+  border-radius: 15px;
+  background: black;
+}
+
+.hidden {
+  display: none;
+}
+
+.back-btn {
+  margin-bottom: 20px;
+}
+
+.server-list {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
   </style>
 </head>
 <body>
-  <div class="player-container">
-    <iframe
-      title="PSG vs Bayern München"
-      src="https://api.embedsportex.site/player#mex/vix"
-      scrolling="no"
-      allowfullscreen
-      allow="encrypted-media; picture-in-picture"
-      sandbox="allow-scripts allow-same-origin allow-fullscreen"
-      referrerpolicy="no-referrer">
-    </iframe>
-  </div>
-</body>
-</html>            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(0, 123, 255, 0.4), transparent 70%);
-            transform: rotate(25deg);
-            animation: rotate 6s infinite linear;
-            z-index: 0;
+  <header>Sports Stream Hub</header>  <div class="container">
+    <div id="sports-view">
+      <h2>Select Sport</h2>
+      <div class="grid" id="sports-list"></div>
+    </div><div id="matches-view" class="hidden">
+  <button class="back-btn" onclick="backToSports()">← Back to Sports</button>
+  <h2 id="matches-title"></h2>
+  <div id="matches-list" class="grid"></div>
+</div>
+
+<div id="player-view" class="hidden">
+  <button class="back-btn" onclick="backToMatches()">← Back to Matches</button>
+  <h2 id="player-title"></h2>
+  <p id="player-league"></p>
+  <iframe id="stream-player" allowfullscreen allow="encrypted-media; picture-in-picture" sandbox="allow-scripts allow-same-origin allow-fullscreen" referrerpolicy="no-referrer"></iframe>
+  <div class="server-list" id="server-list"></div>
+</div>
+
+  </div>  <script>
+    let sportsData = {};
+    let currentSport = null;
+    let currentMatch = null;
+
+    async function loadStreams() {
+      try {
+        const res = await fetch('https://api.embedsportex.site/api/streams?cache=' + Date.now());
+        sportsData = await res.json();
+        renderSports();
+      } catch (err) {
+        document.body.innerHTML = '<h1 style="text-align:center; padding:50px;">Failed to load stream data.</h1>';
+      }
+    }
+
+    function renderSports() {
+      const sportsList = document.getElementById('sports-list');
+      sportsList.innerHTML = '';
+
+      Object.keys(sportsData).forEach(sport => {
+        if (Array.isArray(sportsData[sport]) && sportsData[sport].length > 0) {
+          const btn = document.createElement('button');
+          btn.textContent = sport.toUpperCase();
+          btn.onclick = () => showMatches(sport);
+          sportsList.appendChild(btn);
         }
+      });
+    }
 
-        @keyframes rotate {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
+    function showMatches(sport) {
+      currentSport = sport;
+      document.getElementById('sports-view').classList.add('hidden');
+      document.getElementById('matches-view').classList.remove('hidden');
+      document.getElementById('matches-title').textContent = sport.toUpperCase() + ' Matches';
 
-        .profile img {
-            width: 130px;
-            height: 130px;
-            border-radius: 50%;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 1;
-            border: 5px solid #74ebd5;
-            transition: transform 0.3s ease;
-        }
+      const matchesList = document.getElementById('matches-list');
+      matchesList.innerHTML = '';
 
-        .profile img:hover {
-            transform: scale(1.1) rotate(5deg);
-        }
+      sportsData[sport].forEach(match => {
+        const card = document.createElement('div');
+        card.className = 'match-card';
+        card.innerHTML = `
+          <h3>${match.tag || 'Unknown Match'}</h3>
+          <p>${match.league || ''}</p>
+          <small>${match.kickoff || ''}</small>
+        `;
+        card.onclick = () => showPlayer(match);
+        matchesList.appendChild(card);
+      });
+    }
 
-        h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            color: #007BFF;
-            z-index: 1;
-            position: relative;
-        }
+    function showPlayer(match) {
+      currentMatch = match;
+      document.getElementById('matches-view').classList.add('hidden');
+      document.getElementById('player-view').classList.remove('hidden');
 
-        p {
-            font-size: 16px;
-            line-height: 1.6;
-            margin: 10px 0;
-            position: relative;
-            z-index: 1;
-        }
+      document.getElementById('player-title').textContent = match.tag;
+      document.getElementById('player-league').textContent = match.league || '';
+      document.getElementById('stream-player').src = match.iframes[0].url;
 
-        .info {
-            text-align: left;
-            margin-top: 20px;
-            z-index: 1;
-            position: relative;
-        }
+      const serverList = document.getElementById('server-list');
+      serverList.innerHTML = '';
 
-        .info p {
-            font-size: 15px;
-            margin: 12px 0;
-            padding: 12px;
-            background-color: rgba(0, 123, 255, 0.1);
-            border-radius: 12px;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-        }
+      match.iframes.forEach(server => {
+        const btn = document.createElement('button');
+        btn.textContent = server.server || 'Server';
+        btn.onclick = () => {
+          document.getElementById('stream-player').src = server.url;
+        };
+        serverList.appendChild(btn);
+      });
+    }
 
-        .info p:hover {
-            background-color: rgba(0, 123, 255, 0.2);
-            transform: translateX(5px);
-        }
+    function backToSports() {
+      document.getElementById('matches-view').classList.add('hidden');
+      document.getElementById('sports-view').classList.remove('hidden');
+    }
 
-        .button {
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
-            z-index: 1;
-            position: relative;
-        }
+    function backToMatches() {
+      document.getElementById('player-view').classList.add('hidden');
+      document.getElementById('matches-view').classList.remove('hidden');
+    }
 
-        .button a {
-            text-decoration: none;
-            padding: 12px 25px;
-            background-color: #007BFF;
-            color: #fff;
-            border-radius: 30px;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-
-        .button a:hover {
-            background-color: #0056b3;
-            transform: scale(1.05);
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <div class="profile">
-            <img src="https://i.imgur.com/QakTxln.png" alt="Profile Picture">
-            <h1>Rahmat Jayadi</h1>
-            <p>Mahasiswa Teknik Informatika</p>
-        </div>
-
-        <div class="info">
-            <p><strong>Umur:</strong> 19 Tahun</p>
-            <p><strong>Kampus:</strong> Universitas Muhammadiyah Kalimantan Timur</p>
-            <p><strong>Fakultas:</strong> Sains dan Teknologi</p>
-            <p><strong>Jurusan:</strong> Teknik Informatika</p>
-        </div>
-
-        <div class="button">
-            <a href="#">Hubungi Saya</a>
-        </div>
-    </div>
-
-</body>
+    loadStreams();
+  </script></body>
 </html>
