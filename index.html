@@ -16,10 +16,7 @@
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
-      background:
-        radial-gradient(circle at top right, #1d4ed8 0%, transparent 30%),
-        radial-gradient(circle at top left, #7c3aed 0%, transparent 25%),
-        linear-gradient(to bottom, #09090b, #111827);
+      background: linear-gradient(to bottom, #0b0b0f 0%, #111111 30%, #0f0f14 65%, #000000 100%);
       color: white;
       min-height: 100vh;
       overflow-x: hidden;
@@ -29,98 +26,104 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      backdrop-filter: blur(16px);
-      background: rgba(10,10,15,0.78);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      padding: 18px 20px;
+      backdrop-filter: blur(18px);
+      background: rgba(10,10,10,0.88);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 16px 18px;
       text-align: center;
       font-size: 1.45rem;
       font-weight: 800;
-      letter-spacing: 0.5px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
     }
 
     .container {
-      padding: 18px;
-      max-width: 100%;
+      padding: 16px;
+      width: 100%;
     }
 
     h2 {
-      font-size: 1.25rem;
-      margin-bottom: 16px;
+      font-size: 1.8rem;
+      margin-bottom: 18px;
       font-weight: 800;
-      color: #f8fafc;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-      align-items: stretch;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      width: 100%;
     }
 
     button {
-      background: rgba(255,255,255,0.06);
+      background: linear-gradient(to bottom, rgba(35,35,35,0.96), rgba(20,20,20,0.98));
       color: white;
-      border: 1px solid rgba(255,255,255,0.08);
-      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 14px 10px;
       border-radius: 16px;
       cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 700;
+      font-size: 0.92rem;
+      font-weight: 800;
       transition: all 0.25s ease;
-      backdrop-filter: blur(14px);
+      min-height: 64px;
+      width: 100%;
     }
 
     button:hover,
     button:active {
       transform: scale(0.98);
-      background: rgba(59,130,246,0.25);
-      border-color: rgba(59,130,246,0.4);
+      background: linear-gradient(to bottom, rgba(229,9,20,0.95), rgba(180,0,10,0.95));
+    }
+
+    .back-btn {
+      width: auto;
+      padding: 12px 20px;
+      margin-bottom: 20px;
     }
 
     .match-card {
-      background: rgba(255,255,255,0.06);
-      padding: 18px;
+      background: linear-gradient(to bottom, rgba(28,28,28,0.98), rgba(12,12,12,0.98));
+      padding: 14px;
       border-radius: 18px;
-      cursor: pointer;
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(255,255,255,0.08);
-      transition: 0.25s;
-
+      border: 1px solid rgba(255,255,255,0.04);
+      transition: all 0.25s ease;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 270px;
-      height: 100%;
+      width: 100%;
+      aspect-ratio: 0.82 / 1;
+      min-height: 0;
     }
 
     .match-card:hover,
     .match-card:active {
-      transform: translateY(-3px);
-      background: rgba(255,255,255,0.09);
+      transform: translateY(-4px);
+      border-color: rgba(229,9,20,0.22);
     }
 
     .match-card h3 {
-      font-size: 1rem;
+      font-size: clamp(0.95rem, 2.8vw, 1.1rem);
       margin: 0 0 10px;
-      color: #ffffff;
-      line-height: 1.3;
+      line-height: 1.25;
       font-weight: 800;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .match-card p {
       margin: 0;
-      color: #cbd5e1;
-      font-size: 0.85rem;
-      line-height: 1.4;
+      color: #b3b3b3;
+      font-size: clamp(0.75rem, 2.2vw, 0.9rem);
+      line-height: 1.35;
     }
 
     .match-card small {
       display: block;
       margin-top: 10px;
-      color: #94a3b8;
-      font-size: 0.78rem;
-      line-height: 1.4;
+      color: #8c8c8c;
+      font-size: clamp(0.68rem, 2vw, 0.8rem);
+      line-height: 1.35;
     }
 
     .live-status {
@@ -130,12 +133,12 @@
       margin-top: 12px;
       color: #22c55e;
       font-weight: 800;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
 
     .live-dot {
-      width: 10px;
-      height: 10px;
+      width: 9px;
+      height: 9px;
       background: #22c55e;
       border-radius: 50%;
       box-shadow: 0 0 10px #22c55e;
@@ -143,93 +146,56 @@
     }
 
     .countdown-status {
-      display: inline-block;
       margin-top: 12px;
       color: #facc15;
       font-weight: 700;
-      font-size: 0.85rem;
-      line-height: 1.4;
+      font-size: 0.78rem;
     }
 
     @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.3); opacity: 0.7; }
-      100% { transform: scale(1); opacity: 1; }
+      0%,100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.7; }
     }
 
     iframe {
       width: 100%;
-      height: 250px;
+      height: 240px;
       border: none;
       border-radius: 18px;
       background: black;
       margin-top: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .server-list {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
     }
 
     .hidden {
       display: none;
     }
 
-    .back-btn {
-      margin-bottom: 18px;
-      width: auto;
-      padding: 12px 18px;
-      font-size: 0.9rem;
-      border-radius: 14px;
-    }
-
-    .server-list {
-      margin-top: 18px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .server-list button {
-      flex: 1 1 auto;
-      min-width: 90px;
-      font-size: 0.85rem;
-    }
-
-    #player-title {
-      margin-top: 10px;
-      font-size: 1.2rem;
-      font-weight: 800;
-    }
-
-    #player-league {
-      color: #94a3b8;
-      font-size: 0.9rem;
-      margin-bottom: 8px;
-    }
-
+    .refresh-info,
     .error {
       text-align: center;
-      padding: 60px 20px;
-      color: #e5e7eb;
-      font-size: 1rem;
-    }
-
-    .refresh-info {
-      text-align: center;
-      color: #94a3b8;
-      font-size: 0.78rem;
-      margin-top: 8px;
+      color: #6b7280;
+      margin-top: 14px;
     }
 
     @media (min-width: 768px) {
       .container {
-        max-width: 700px;
+        max-width: 760px;
         margin: auto;
       }
 
-      iframe {
-        height: 400px;
+      .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
-      .grid {
-        grid-template-columns: repeat(3, 1fr);
+      iframe {
+        height: 420px;
       }
     }
   </style>
@@ -278,55 +244,27 @@
 
   async function loadStreams(force = false) {
     const now = Date.now();
-
-    // Anti aggressive polling
-    if (!force && now - lastFetchTime < 30000) {
-      return;
-    }
+    if (!force && now - lastFetchTime < 30000) return;
 
     try {
       lastFetchTime = now;
 
-      const res = await fetch(
-        'https://api.embedsportex.site/api/streams',
-        {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json'
-          }
-        }
-      );
+      const res = await fetch('https://api.embedsportex.site/api/streams', {
+        headers: { 'Accept': 'application/json' }
+      });
 
-      if (!res.ok) {
-        throw new Error('API request failed');
-      }
+      if (!res.ok) throw new Error('API request failed');
 
       sportsData = await res.json();
-
-      if (!sportsData || Object.keys(sportsData).length === 0) {
-        throw new Error('No stream data available');
-      }
-
       renderSports();
-
-      if (currentSport) {
-        showMatches(currentSport);
-      }
-
-      if (currentMatch) {
-        showPlayer(currentMatch);
-      }
 
     } catch (err) {
       console.error(err);
-
       document.body.innerHTML = `
         <header>⚽ Sports Stream Hub</header>
         <div class="error">
           <h2>Failed to load stream data.</h2>
-          <p style="color:#94a3b8;">
-            API unavailable, blocked, or rate limited.
-          </p>
+          <p>API unavailable or blocked.</p>
         </div>
       `;
     }
@@ -348,12 +286,9 @@
 
   function showMatches(sport) {
     currentSport = sport;
-
     document.getElementById('sports-view').classList.add('hidden');
     document.getElementById('matches-view').classList.remove('hidden');
-
-    document.getElementById('matches-title').textContent =
-      sport.toUpperCase() + ' Matches';
+    document.getElementById('matches-title').textContent = sport.toUpperCase() + ' Matches';
 
     const matchesList = document.getElementById('matches-list');
     matchesList.innerHTML = '';
@@ -363,7 +298,6 @@
       card.className = 'match-card';
 
       let statusHTML = '';
-
       if (match.kickoff) {
         const kickoffDate = new Date(match.kickoff);
         const now = new Date();
@@ -374,33 +308,20 @@
               <div class="live-status">
                 <span class="live-dot"></span>
                 LIVE
-              </div>
-            `;
+              </div>`;
           } else {
             const diffMs = kickoffDate - now;
             const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-            const diffHours = Math.floor(
-              (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-            );
-            const diffMinutes = Math.floor(
-              (diffMs % (1000 * 60 * 60)) / (1000 * 60)
-            );
+            const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
-            let countdownText = '';
+            let countdownText = diffDays > 0
+              ? `${diffDays}d ${diffHours}h until start`
+              : diffHours > 0
+              ? `${diffHours}h ${diffMinutes}m until start`
+              : `${diffMinutes}m until start`;
 
-            if (diffDays > 0) {
-              countdownText = `${diffDays}d ${diffHours}h until start`;
-            } else if (diffHours > 0) {
-              countdownText = `${diffHours}h ${diffMinutes}m until start`;
-            } else {
-              countdownText = `${diffMinutes}m until start`;
-            }
-
-            statusHTML = `
-              <div class="countdown-status">
-                ${countdownText}
-              </div>
-            `;
+            statusHTML = `<div class="countdown-status">${countdownText}</div>`;
           }
         }
       }
@@ -413,22 +334,17 @@
       `;
 
       card.onclick = () => showPlayer(match);
-
       matchesList.appendChild(card);
     });
   }
 
   function showPlayer(match) {
     currentMatch = match;
-
     document.getElementById('matches-view').classList.add('hidden');
     document.getElementById('player-view').classList.remove('hidden');
 
-    document.getElementById('player-title').textContent =
-      match.tag || 'Unknown Match';
-
-    document.getElementById('player-league').textContent =
-      match.league || '';
+    document.getElementById('player-title').textContent = match.tag || 'Unknown Match';
+    document.getElementById('player-league').textContent = match.league || '';
 
     const player = document.getElementById('stream-player');
     player.src = match.iframes?.[0]?.url || '';
@@ -436,18 +352,12 @@
     const serverList = document.getElementById('server-list');
     serverList.innerHTML = '';
 
-    if (match.iframes) {
-      match.iframes.forEach(server => {
-        const btn = document.createElement('button');
-        btn.textContent = server.server || 'Server';
-
-        btn.onclick = () => {
-          player.src = server.url;
-        };
-
-        serverList.appendChild(btn);
-      });
-    }
+    match.iframes?.forEach(server => {
+      const btn = document.createElement('button');
+      btn.textContent = server.server || 'Server';
+      btn.onclick = () => player.src = server.url;
+      serverList.appendChild(btn);
+    });
   }
 
   function backToSports() {
@@ -460,13 +370,8 @@
     document.getElementById('matches-view').classList.remove('hidden');
   }
 
-  // Initial load
   loadStreams(true);
-
-  // Refresh tiap 30 detik sesuai aturan API
-  setInterval(() => {
-    loadStreams();
-  }, 30000);
+  setInterval(() => loadStreams(), 30000);
 </script>
 
 </body>
