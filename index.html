@@ -112,6 +112,48 @@
       font-size: 0.75rem;
     }
 
+    .live-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      color: #22c55e;
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+
+    .live-dot {
+      width: 10px;
+      height: 10px;
+      background: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #22c55e;
+      animation: pulse 1.5s infinite;
+    }
+
+    .countdown-status {
+      display: inline-block;
+      margin-top: 10px;
+      color: #facc15;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.3);
+        opacity: 0.7;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
     iframe {
       width: 100%;
       height: 250px;
@@ -159,7 +201,6 @@
       margin-bottom: 8px;
     }
 
-    .loading,
     .error {
       text-align: center;
       padding: 40px 20px;
@@ -253,7 +294,8 @@
     document.getElementById('sports-view').classList.add('hidden');
     document.getElementById('matches-view').classList.remove('hidden');
 
-    document.getElementById('matches-title').textContent = sport.toUpperCase() + ' Matches';
+    document.getElementById('matches-title').textContent =
+      sport.toUpperCase() + ' Matches';
 
     const matchesList = document.getElementById('matches-list');
     matchesList.innerHTML = '';
@@ -262,10 +304,56 @@
       const card = document.createElement('div');
       card.className = 'match-card';
 
+      let statusHTML = '';
+
+      if (match.kickoff) {
+        const kickoffDate = new Date(match.kickoff);
+        const now = new Date();
+
+        if (!isNaN(kickoffDate)) {
+          if (now >= kickoffDate) {
+            statusHTML = `
+              <div class="live-status">
+                <span class="live-dot"></span>
+                LIVE
+              </div>
+            `;
+          } else {
+            const diffMs = kickoffDate - now;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor(
+              (diffMs % (1000 * 60 * 60 * 24)) /
+              (1000 * 60 * 60)
+            );
+            const diffMinutes = Math.floor(
+              (diffMs % (1000 * 60 * 60)) /
+              (1000 * 60)
+            );
+
+            let countdownText = '';
+
+            if (diffDays > 0) {
+              countdownText = `${diffDays}d ${diffHours}h until start`;
+            } else if (diffHours > 0) {
+              countdownText = `${diffHours}h ${diffMinutes}m until start`;
+            } else {
+              countdownText = `${diffMinutes}m until start`;
+            }
+
+            statusHTML = `
+              <div class="countdown-status">
+                ${countdownText}
+              </div>
+            `;
+          }
+        }
+      }
+
       card.innerHTML = `
         <h3>${match.tag || 'Unknown Match'}</h3>
         <p>${match.league || ''}</p>
         <small>${match.kickoff || ''}</small>
+        ${statusHTML}
       `;
 
       card.onclick = () => showPlayer(match);
@@ -279,8 +367,11 @@
     document.getElementById('matches-view').classList.add('hidden');
     document.getElementById('player-view').classList.remove('hidden');
 
-    document.getElementById('player-title').textContent = match.tag || 'Unknown Match';
-    document.getElementById('player-league').textContent = match.league || '';
+    document.getElementById('player-title').textContent =
+      match.tag || 'Unknown Match';
+
+    document.getElementById('player-league').textContent =
+      match.league || '';
 
     const player = document.getElementById('stream-player');
     player.src = match.iframes[0]?.url || '';
