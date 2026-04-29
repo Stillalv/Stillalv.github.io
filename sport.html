@@ -307,25 +307,6 @@ let sportsData = {};
 let currentOpenSport = null;
 let timerInterval = null;
 
-async function forceLandscapeFullscreen() {
-  const playerView = document.getElementById('player-view');
-
-  try {
-    if (playerView.requestFullscreen) {
-      await playerView.requestFullscreen();
-    } else if (playerView.webkitRequestFullscreen) {
-      await playerView.webkitRequestFullscreen();
-    }
-
-    if (screen.orientation && screen.orientation.lock) {
-      await screen.orientation.lock("landscape");
-    }
-
-  } catch (err) {
-    console.log("Fullscreen/Orientation lock gagal:", err);
-  }
-}
-
 async function loadData() {
   try {
     const res = await fetch(
@@ -479,8 +460,6 @@ function openPlayer(match) {
   document.getElementById('player-view').classList.remove('hidden');
   document.getElementById('player-info').textContent = match.tag;
 
-  forceLandscapeFullscreen();
-
   const selector = document.getElementById('server-selector');
   const iframe = document.getElementById('stream-player');
 
@@ -532,6 +511,37 @@ async function closePlayer() {
 
   } catch (e) {}
 }
+
+// Lock orientation ONLY when fullscreen button pressed manually
+document.addEventListener("fullscreenchange", async () => {
+  try {
+    if (document.fullscreenElement) {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock("landscape");
+      }
+    } else {
+      if (screen.orientation && screen.orientation.unlock) {
+        screen.orientation.unlock();
+      }
+    }
+  } catch (err) {
+    console.log("Orientation lock error:", err);
+  }
+});
+
+document.addEventListener("webkitfullscreenchange", async () => {
+  try {
+    if (document.webkitFullscreenElement) {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock("landscape");
+      }
+    } else {
+      if (screen.orientation && screen.orientation.unlock) {
+        screen.orientation.unlock();
+      }
+    }
+  } catch (err) {}
+});
 
 loadData();
 setInterval(loadData, 30000);
