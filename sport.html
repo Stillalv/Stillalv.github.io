@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sports Stream Hub</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 
   <style>
@@ -221,6 +223,20 @@
       border: none;
     }
 
+    #player-view:fullscreen .video-wrapper,
+    #player-view:-webkit-full-screen .video-wrapper {
+      width: 100vw;
+      height: 100vh;
+      max-height: 100vh;
+      aspect-ratio: auto;
+    }
+
+    #player-view:fullscreen iframe,
+    #player-view:-webkit-full-screen iframe {
+      width: 100%;
+      height: 100%;
+    }
+
     @media (max-width: 768px) {
       .video-wrapper {
         max-height: 40vh;
@@ -264,6 +280,8 @@
     <iframe
       id="stream-player"
       allowfullscreen
+      webkitallowfullscreen
+      mozallowfullscreen
       allow="encrypted-media; picture-in-picture; fullscreen"
       sandbox="allow-scripts allow-same-origin allow-fullscreen"
       referrerpolicy="no-referrer">
@@ -289,9 +307,31 @@ let sportsData = {};
 let currentOpenSport = null;
 let timerInterval = null;
 
+async function forceLandscapeFullscreen() {
+  const playerView = document.getElementById('player-view');
+
+  try {
+    if (playerView.requestFullscreen) {
+      await playerView.requestFullscreen();
+    } else if (playerView.webkitRequestFullscreen) {
+      await playerView.webkitRequestFullscreen();
+    }
+
+    if (screen.orientation && screen.orientation.lock) {
+      await screen.orientation.lock("landscape");
+    }
+
+  } catch (err) {
+    console.log("Fullscreen/Orientation lock gagal:", err);
+  }
+}
+
 async function loadData() {
   try {
-    const res = await fetch('https://api.embedsportex.site/api/streams?cache=' + Date.now());
+    const res = await fetch(
+      'https://api.embedsportex.site/api/streams?cache=' + Date.now()
+    );
+
     sportsData = await res.json();
 
     document.getElementById('loading').classList.add('hidden');
@@ -406,18 +446,23 @@ function updateTimerDisplay(targetDate, timerId, statusId) {
   const diff = targetDate - now;
 
   if (diff <= 0) {
-    statusElem.innerHTML = `<span class="status-badge status-live">LIVE</span>`;
+    statusElem.innerHTML =
+      `<span class="status-badge status-live">LIVE</span>`;
+
     timerElem.innerHTML = `NOW LIVE`;
     timerElem.style.color = "#22c55e";
+
   } else {
-    statusElem.innerHTML = `<span class="status-badge status-upcoming">UPCOMING</span>`;
+    statusElem.innerHTML =
+      `<span class="status-badge status-upcoming">UPCOMING</span>`;
 
     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
     const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
     const m = Math.floor((diff / (1000 * 60)) % 60);
     const s = Math.floor((diff / 1000) % 60);
 
-    timerElem.innerHTML = `${d}d : ${h}h : ${m}m : ${s}s`;
+    timerElem.innerHTML =
+      `${d}d : ${h}h : ${m}m : ${s}s`;
   }
 }
 
@@ -433,6 +478,8 @@ function showCategories() {
 function openPlayer(match) {
   document.getElementById('player-view').classList.remove('hidden');
   document.getElementById('player-info').textContent = match.tag;
+
+  forceLandscapeFullscreen();
 
   const selector = document.getElementById('server-selector');
   const iframe = document.getElementById('stream-player');
@@ -466,13 +513,24 @@ function openPlayer(match) {
   };
 }
 
-function closePlayer() {
+async function closePlayer() {
   document.getElementById('player-view').classList.add('hidden');
 
   const iframe = document.getElementById('stream-player');
   iframe.src = 'about:blank';
 
   document.getElementById('server-selector').innerHTML = '';
+
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    }
+
+    if (screen.orientation && screen.orientation.unlock) {
+      screen.orientation.unlock();
+    }
+
+  } catch (e) {}
 }
 
 loadData();
