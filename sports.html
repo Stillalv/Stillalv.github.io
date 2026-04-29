@@ -216,7 +216,7 @@
       max-height: 60vh;
     }
 
-    #main-player {
+    #stream-player {
       width: 100%;
       height: 100%;
       border: none;
@@ -268,7 +268,7 @@
     <iframe
       id="stream-player"
       allowfullscreen
-      allow="encrypted-media; picture-in-picture"
+      allow="encrypted-media; picture-in-picture; fullscreen"
       sandbox="allow-scripts allow-same-origin allow-fullscreen"
       referrerpolicy="no-referrer">
     </iframe>
@@ -439,13 +439,21 @@ function openPlayer(match) {
   document.getElementById('player-info').textContent = match.tag;
 
   const selector = document.getElementById('server-selector');
-  const iframe = document.getElementById('main-player');
+  const iframe = document.getElementById('stream-player');
 
   selector.innerHTML = '';
 
   if (!match.iframes || match.iframes.length === 0) {
     iframe.src = '';
     return;
+  }
+
+  function loadStream(url) {
+    iframe.src = 'about:blank';
+
+    setTimeout(() => {
+      iframe.src = url;
+    }, 150);
   }
 
   match.iframes.forEach((server, index) => {
@@ -455,16 +463,19 @@ function openPlayer(match) {
     selector.appendChild(option);
   });
 
-  iframe.src = match.iframes[0].url;
+  loadStream(match.iframes[0].url);
 
   selector.onchange = function () {
-    iframe.src = this.value;
+    loadStream(this.value);
   };
 }
 
 function closePlayer() {
   document.getElementById('player-view').classList.add('hidden');
-  document.getElementById('main-player').src = '';
+
+  const iframe = document.getElementById('stream-player');
+  iframe.src = 'about:blank';
+
   document.getElementById('server-selector').innerHTML = '';
 }
 
