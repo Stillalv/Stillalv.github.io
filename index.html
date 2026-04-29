@@ -1,191 +1,317 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sports Stream Hub</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
   <style>
     * {
       box-sizing: border-box;
-    }body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom, #0a0a0a, #18181b);
-  color: white;
-  min-height: 100vh;
-}
+      -webkit-tap-highlight-color: transparent;
+    }
 
-header {
-  text-align: center;
-  padding: 20px;
-  font-size: 2rem;
-  font-weight: bold;
-}
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background:
+        radial-gradient(circle at top right, #1d4ed8 0%, transparent 30%),
+        radial-gradient(circle at top left, #7c3aed 0%, transparent 25%),
+        linear-gradient(to bottom, #09090b, #111827);
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-.container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 20px;
-}
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      background: rgba(10,10,15,0.75);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 18px 20px;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-}
+    .container {
+      padding: 18px;
+      max-width: 100%;
+    }
 
-button {
-  background: #27272a;
-  color: white;
-  border: none;
-  padding: 15px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: 0.2s;
-}
+    h2 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      font-weight: 700;
+      color: #f3f4f6;
+    }
 
-button:hover {
-  background: #3f3f46;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
 
-.match-card {
-  background: #27272a;
-  padding: 20px;
-  border-radius: 15px;
-  cursor: pointer;
-}
+    button {
+      background: rgba(255,255,255,0.06);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 14px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(14px);
+    }
 
-.match-card:hover {
-  background: #3f3f46;
-}
+    button:hover,
+    button:active {
+      transform: scale(0.98);
+      background: rgba(59,130,246,0.25);
+      border-color: rgba(59,130,246,0.4);
+    }
 
-iframe {
-  width: 100%;
-  height: 70vh;
-  border: none;
-  border-radius: 15px;
-  background: black;
-}
+    .match-card {
+      background: rgba(255,255,255,0.06);
+      padding: 18px;
+      border-radius: 18px;
+      cursor: pointer;
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: 0.25s;
+    }
 
-.hidden {
-  display: none;
-}
+    .match-card:hover,
+    .match-card:active {
+      transform: translateY(-3px);
+      background: rgba(255,255,255,0.09);
+    }
 
-.back-btn {
-  margin-bottom: 20px;
-}
+    .match-card h3 {
+      font-size: 1rem;
+      margin: 0 0 8px;
+      color: #ffffff;
+    }
 
-.server-list {
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
+    .match-card p {
+      margin: 0;
+      color: #cbd5e1;
+      font-size: 0.85rem;
+    }
 
+    .match-card small {
+      display: block;
+      margin-top: 8px;
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
+
+    iframe {
+      width: 100%;
+      height: 250px;
+      border: none;
+      border-radius: 18px;
+      background: black;
+      margin-top: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .back-btn {
+      margin-bottom: 16px;
+      width: auto;
+      padding: 12px 18px;
+      font-size: 0.9rem;
+      border-radius: 14px;
+    }
+
+    .server-list {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .server-list button {
+      flex: 1 1 auto;
+      min-width: 90px;
+      font-size: 0.85rem;
+    }
+
+    #player-title {
+      margin-top: 10px;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    #player-league {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .loading,
+    .error {
+      text-align: center;
+      padding: 40px 20px;
+      color: #e5e7eb;
+      font-size: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        max-width: 700px;
+        margin: auto;
+      }
+
+      iframe {
+        height: 400px;
+      }
+
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
   </style>
 </head>
 <body>
-  <header>Sports Stream Hub</header>  <div class="container">
-    <div id="sports-view">
-      <h2>Select Sport</h2>
-      <div class="grid" id="sports-list"></div>
-    </div><div id="matches-view" class="hidden">
-  <button class="back-btn" onclick="backToSports()">← Back to Sports</button>
-  <h2 id="matches-title"></h2>
-  <div id="matches-list" class="grid"></div>
+
+<header>⚽ Sports Stream Hub</header>
+
+<div class="container">
+
+  <div id="sports-view">
+    <h2>Select Sport</h2>
+    <div class="grid" id="sports-list"></div>
+  </div>
+
+  <div id="matches-view" class="hidden">
+    <button class="back-btn" onclick="backToSports()">← Back</button>
+    <h2 id="matches-title"></h2>
+    <div id="matches-list" class="grid"></div>
+  </div>
+
+  <div id="player-view" class="hidden">
+    <button class="back-btn" onclick="backToMatches()">← Back</button>
+    <h2 id="player-title"></h2>
+    <p id="player-league"></p>
+
+    <iframe
+      id="stream-player"
+      allowfullscreen
+      allow="encrypted-media; picture-in-picture"
+      sandbox="allow-scripts allow-same-origin allow-fullscreen"
+      referrerpolicy="no-referrer">
+    </iframe>
+
+    <div class="server-list" id="server-list"></div>
+  </div>
+
 </div>
 
-<div id="player-view" class="hidden">
-  <button class="back-btn" onclick="backToMatches()">← Back to Matches</button>
-  <h2 id="player-title"></h2>
-  <p id="player-league"></p>
-  <iframe id="stream-player" allowfullscreen allow="encrypted-media; picture-in-picture" sandbox="allow-scripts allow-same-origin allow-fullscreen" referrerpolicy="no-referrer"></iframe>
-  <div class="server-list" id="server-list"></div>
-</div>
+<script>
+  let sportsData = {};
+  let currentSport = null;
+  let currentMatch = null;
 
-  </div>  <script>
-    let sportsData = {};
-    let currentSport = null;
-    let currentMatch = null;
-
-    async function loadStreams() {
-      try {
-        const res = await fetch('https://api.embedsportex.site/api/streams?cache=' + Date.now());
-        sportsData = await res.json();
-        renderSports();
-      } catch (err) {
-        document.body.innerHTML = '<h1 style="text-align:center; padding:50px;">Failed to load stream data.</h1>';
-      }
+  async function loadStreams() {
+    try {
+      const res = await fetch('https://api.embedsportex.site/api/streams?cache=' + Date.now());
+      sportsData = await res.json();
+      renderSports();
+    } catch (err) {
+      document.body.innerHTML = '<div class="error">Failed to load stream data.</div>';
     }
+  }
 
-    function renderSports() {
-      const sportsList = document.getElementById('sports-list');
-      sportsList.innerHTML = '';
+  function renderSports() {
+    const sportsList = document.getElementById('sports-list');
+    sportsList.innerHTML = '';
 
-      Object.keys(sportsData).forEach(sport => {
-        if (Array.isArray(sportsData[sport]) && sportsData[sport].length > 0) {
-          const btn = document.createElement('button');
-          btn.textContent = sport.toUpperCase();
-          btn.onclick = () => showMatches(sport);
-          sportsList.appendChild(btn);
-        }
-      });
-    }
-
-    function showMatches(sport) {
-      currentSport = sport;
-      document.getElementById('sports-view').classList.add('hidden');
-      document.getElementById('matches-view').classList.remove('hidden');
-      document.getElementById('matches-title').textContent = sport.toUpperCase() + ' Matches';
-
-      const matchesList = document.getElementById('matches-list');
-      matchesList.innerHTML = '';
-
-      sportsData[sport].forEach(match => {
-        const card = document.createElement('div');
-        card.className = 'match-card';
-        card.innerHTML = `
-          <h3>${match.tag || 'Unknown Match'}</h3>
-          <p>${match.league || ''}</p>
-          <small>${match.kickoff || ''}</small>
-        `;
-        card.onclick = () => showPlayer(match);
-        matchesList.appendChild(card);
-      });
-    }
-
-    function showPlayer(match) {
-      currentMatch = match;
-      document.getElementById('matches-view').classList.add('hidden');
-      document.getElementById('player-view').classList.remove('hidden');
-
-      document.getElementById('player-title').textContent = match.tag;
-      document.getElementById('player-league').textContent = match.league || '';
-      document.getElementById('stream-player').src = match.iframes[0].url;
-
-      const serverList = document.getElementById('server-list');
-      serverList.innerHTML = '';
-
-      match.iframes.forEach(server => {
+    Object.keys(sportsData).forEach(sport => {
+      if (Array.isArray(sportsData[sport]) && sportsData[sport].length > 0) {
         const btn = document.createElement('button');
-        btn.textContent = server.server || 'Server';
-        btn.onclick = () => {
-          document.getElementById('stream-player').src = server.url;
-        };
-        serverList.appendChild(btn);
-      });
-    }
+        btn.textContent = sport.toUpperCase();
+        btn.onclick = () => showMatches(sport);
+        sportsList.appendChild(btn);
+      }
+    });
+  }
 
-    function backToSports() {
-      document.getElementById('matches-view').classList.add('hidden');
-      document.getElementById('sports-view').classList.remove('hidden');
-    }
+  function showMatches(sport) {
+    currentSport = sport;
 
-    function backToMatches() {
-      document.getElementById('player-view').classList.add('hidden');
-      document.getElementById('matches-view').classList.remove('hidden');
-    }
+    document.getElementById('sports-view').classList.add('hidden');
+    document.getElementById('matches-view').classList.remove('hidden');
 
-    loadStreams();
-  </script></body>
+    document.getElementById('matches-title').textContent = sport.toUpperCase() + ' Matches';
+
+    const matchesList = document.getElementById('matches-list');
+    matchesList.innerHTML = '';
+
+    sportsData[sport].forEach(match => {
+      const card = document.createElement('div');
+      card.className = 'match-card';
+
+      card.innerHTML = `
+        <h3>${match.tag || 'Unknown Match'}</h3>
+        <p>${match.league || ''}</p>
+        <small>${match.kickoff || ''}</small>
+      `;
+
+      card.onclick = () => showPlayer(match);
+      matchesList.appendChild(card);
+    });
+  }
+
+  function showPlayer(match) {
+    currentMatch = match;
+
+    document.getElementById('matches-view').classList.add('hidden');
+    document.getElementById('player-view').classList.remove('hidden');
+
+    document.getElementById('player-title').textContent = match.tag || 'Unknown Match';
+    document.getElementById('player-league').textContent = match.league || '';
+
+    const player = document.getElementById('stream-player');
+    player.src = match.iframes[0]?.url || '';
+
+    const serverList = document.getElementById('server-list');
+    serverList.innerHTML = '';
+
+    match.iframes.forEach(server => {
+      const btn = document.createElement('button');
+      btn.textContent = server.server || 'Server';
+
+      btn.onclick = () => {
+        player.src = server.url;
+      };
+
+      serverList.appendChild(btn);
+    });
+  }
+
+  function backToSports() {
+    document.getElementById('matches-view').classList.add('hidden');
+    document.getElementById('sports-view').classList.remove('hidden');
+  }
+
+  function backToMatches() {
+    document.getElementById('player-view').classList.add('hidden');
+    document.getElementById('matches-view').classList.remove('hidden');
+  }
+
+  loadStreams();
+</script>
+
+</body>
 </html>
