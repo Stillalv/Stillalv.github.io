@@ -266,11 +266,34 @@
 
   async function loadStreams() {
     try {
-      const res = await fetch('https://api.embedsportex.site/api/streams?cache=' + Date.now());
+      const proxyUrl = 'https://api.allorigins.win/raw?url=';
+      const targetUrl = encodeURIComponent('https://api.embedsportex.site/api/streams');
+
+      const res = await fetch(proxyUrl + targetUrl + '&cache=' + Date.now());
+
+      if (!res.ok) {
+        throw new Error('Network response failed');
+      }
+
       sportsData = await res.json();
+
+      if (!sportsData || Object.keys(sportsData).length === 0) {
+        throw new Error('Empty data');
+      }
+
       renderSports();
+
     } catch (err) {
-      document.body.innerHTML = '<div class="error">Failed to load stream data.</div>';
+      console.error(err);
+
+      document.body.innerHTML = `
+        <div class="error">
+          <h2>Failed to load stream data.</h2>
+          <p style="color:#94a3b8;">
+            API blocked by CORS or server unavailable.
+          </p>
+        </div>
+      `;
     }
   }
 
