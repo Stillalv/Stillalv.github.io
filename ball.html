@@ -841,4 +841,532 @@ function renderFavoritesList() {
       month: 'short'
     });
 
-    const card = document.createElement('d
+    const card = document.createElement('div');
+    card.className = 'match-card';
+
+    card.innerHTML = `
+      <div>
+        <div id="status-fav-${matchId}"></div>
+        <h3>${match.tag}</h3>
+        <p>${match.league}</p>
+      </div>
+
+      <div>
+        <div class="local-time">📅 ${dateString} • 🕒 ${timeString}</div>
+        <div id="timer-fav-${matchId}" class="countdown-timer"></div>
+        <button class="bookmark-btn active" data-match-id="${matchId}">
+          ❤️ Saved
+        </button>
+      </div>
+    `;
+
+    const bookmarkBtn = card.querySelector('.bookmark-btn');
+    bookmarkBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFavorite(matchId, bookmarkBtn);
+    });
+
+    card.onclick = (e) => {
+      if (e.target.className.includes('bookmark-btn')) return;
+      openPlayer(match);
+    };
+
+    favoritesList.appendChild(card);
+
+    const kickoffTime = new Date(match.kickoff.replace(' ', 'T') + '+07:00');
+    updateTimerDisplay(
+      kickoffTime,
+      `timer-fav-${matchId}`,
+      `status-fav-${matchId}`
+    );
+  });
+
+  // Update timers for favorites
+  if (timerInterval) clearInterval(timerInterval);
+
+  timerInterval = setInterval(() => {
+    favorites.forEach(matchId => {
+      const timerElem = document.getElementById(`timer-fav-${matchId}`);
+      if (timerElem && favoriteMatches[matchId]) {
+        const kickoff = new Date(favoriteMatches[matchId].kickoff.replace(' ', 'T') + '+07:00');
+        updateTimerDisplay(
+          kickoff,
+          `timer-fav-${matchId}`,
+          `status-fav-${matchId}`
+        );
+      }
+    });
+  }, 1000);
+}
+
+async function loadData() {
+  try {
+    // Load from API using CORS proxy (for GitHub Pages compatibility)
+    const apiUrl = 'https://api.embedsportex.site/api/streams?cache=' + Date.now();
+    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(apiUrl);
+    
+    const res = await fetch(proxyUrl);
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+
+    const proxyData = await res.json();
+    sportsData = JSON.parse(proxyData.contents);
+    
+    if (!sportsData || Object.keys(sportsData).length === 0) {
+      throw new Error('No sports data received');
+    }
+
+    document.getElementById('loading').classList.add('hidden');
+    renderCategoryMenu();
+
+    if (currentOpenSport) {
+      renderMatchList(currentOpenSport);
+    }
+
+  } catch (e) {
+    console.error("Data Load Error:", e);
+    document.getElementById('loading').innerHTML = `
+      <div style="text-align:center; padding:50px; color: #E50914;">
+        <p>❌ Failed to load sports data</p>
+        <p style="font-size: 0.9rem; color: #999; margin-top: 10px;">Error: ${e.message}</p>
+        <button onclick="location.reload()" style="
+          background: #E50914;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          margin-top: 20px;
+          font-weight: 700;
+        ">Retry</button>
+      </div>
+    `;
+  }
+}
+
+function renderCategoryMenu() {
+  const list = document.getElementById('category-list');
+  list.innerHTML = '';
+
+  Object.keys(sportsData).forEach(sport => {
+    if (Array.isArray(sportsData[sport]) && sportsData[sport].length > 0) {
+      const card = document.createElement('div');
+      card.className = 'category-card';
+
+      card.innerHTML = `
+        <span class="category-icon">${sportIcons[sport] || '🎯'}</span>
+        <span class="category-name">${sport}</span>
+      `;
+
+      card.onclick = () => renderMatchList(sport);
+
+      list.appendChild(card);
+    }
+  });
+}
+
+function renderMatchList(sport) {
+  currentOpenSport = sport;
+
+  document.getElementById('view-categories').classList.add('hidden');
+  document.getElementById('view-matches').classList.remove('hidden');
+
+  document.getElementById('match-title-text').innerHTML =
+    `${sportIcons[sport] || ''} ${sport} Schedule`;
+
+  const list = document.getElementById('match-list');
+  const searchInput = document.getElementById('search-input');
+  
+  list.innerHTML = '';
+  searchInput.value = '';
+  filterStatus = 'ALL';
+  document.querySelectorAll('.filter-btn').forEach((btn, i) => {
+    if (i === 0) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+
+  const renderMatches = () => {
+    doRenderMatches();
+  };
+
+  renderMatches();
+
+  if (timerInterval) clearInterval(timerInterval);
+
+  timerInterval = setInterval(() => {
+    sportsData[sport].forEach((match, index) => {
+      const kickoff = new Date(match.kickoff.replace(' ', 'T') + '+07:00');
+
+      updateTimerDisplay(
+        kickoff,
+        `timer-${sport}-${index}`,
+        `status-${sport}-${index}`
+      );
+    });
+  }, 1000);
+
+  // Add search listener
+  searchInput.addEventListener('input', renderMatches);
+}
+
+function doRenderMatches() {
+  const list = document.getElementById('match-list');
+  const searchInput = document.getElementById('search-input');
+  const searchTerm = searchInput.value.toLowerCase();
+  const sport = currentOpenSport;
+  
+  list.innerHTML = '';
+  
+  if (!sportsData[sport]) return;
+  
+  sportsData[sport].forEach((match, index) => {
+    const kickoff = new Date(match.kickoff.replace(' ', 'T') + '+07:00');
+    const now = new Date();
+    const isLive = kickoff <= now;
+    
+    // Apply search filter
+    if (searchTerm && !match.tag.toLowerCase().includes(searchTerm) && !match.league.toLowerCase().includes(searchTerm)) {
+      return;
+    }
+    
+    // Apply status filter
+    if (filterStatus === 'LIVE' && !isLive) return;
+    if (filterStatus === 'UPCOMING' && isLive) return;
+
+    const timeString = kickoff.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+
+    const dateString = kickoff.toLocaleDateString([], {
+      day: 'numeric',
+      month: 'short'
+    });
+
+    const card = document.createElement('div');
+    card.className = 'match-card';
+
+    const matchId = getMatchId(match);
+    const isFavorite = favorites.includes(matchId);
+
+    card.innerHTML = `
+      <div>
+        <div id="status-${sport}-${index}"></div>
+        <h3>${match.tag}</h3>
+        <p>${match.league}</p>
+      </div>
+
+      <div>
+        <div class="local-time">📅 ${dateString} • 🕒 ${timeString}</div>
+        <div id="timer-${sport}-${index}" class="countdown-timer"></div>
+        <button class="bookmark-btn ${isFavorite ? 'active' : ''}" data-match-id="${matchId}">
+          ${isFavorite ? '❤️ Saved' : '🤍 Save'}
+        </button>
+      </div>
+    `;
+
+    const bookmarkBtn = card.querySelector('.bookmark-btn');
+    bookmarkBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFavorite(matchId, bookmarkBtn, match);
+    });
+
+    card.onclick = (e) => {
+      if (e.target.className.includes('bookmark-btn')) return;
+      addToHistory(match);
+      openPlayer(match);
+    };
+
+    list.appendChild(card);
+
+    updateTimerDisplay(
+      kickoff,
+      `timer-${sport}-${index}`,
+      `status-${sport}-${index}`
+    );
+  });
+}
+
+function updateTimerDisplay(targetDate, timerId, statusId) {
+  const timerElem = document.getElementById(timerId);
+  const statusElem = document.getElementById(statusId);
+
+  if (!timerElem || !statusElem) return;
+
+  const now = new Date();
+  const diff = targetDate - now;
+
+  if (diff <= 0) {
+    statusElem.innerHTML =
+      `<span class="status-badge status-live">LIVE</span>`;
+
+    timerElem.innerHTML = `NOW LIVE`;
+    timerElem.style.color = "#22c55e";
+
+  } else {
+    statusElem.innerHTML =
+      `<span class="status-badge status-upcoming">UPCOMING</span>`;
+
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const m = Math.floor((diff / (1000 * 60)) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+
+    timerElem.innerHTML =
+      `${d}d : ${h}h : ${m}m : ${s}s`;
+  }
+}
+
+function showCategories() {
+  currentOpenSport = null;
+
+  if (timerInterval) clearInterval(timerInterval);
+
+  document.getElementById('view-matches').classList.add('hidden');
+  document.getElementById('view-favorites').classList.add('hidden');
+  document.getElementById('view-history').classList.add('hidden');
+  document.getElementById('view-categories').classList.remove('hidden');
+}
+
+function filterMatches(status) {
+  filterStatus = status;
+  
+  // Update button styling
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Set active button
+  if (event && event.target) {
+    event.target.classList.add('active');
+  } else {
+    // Fallback: find and click the right button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      if (btn.textContent.includes(status === 'ALL' ? 'All' : status === 'LIVE' ? 'LIVE' : 'Upcoming')) {
+        btn.classList.add('active');
+      }
+    });
+  }
+  
+  // Re-render matches with filter
+  doRenderMatches();
+}
+
+function showHistory() {
+  currentOpenSport = null;
+
+  if (timerInterval) clearInterval(timerInterval);
+
+  document.getElementById('view-categories').classList.add('hidden');
+  document.getElementById('view-matches').classList.add('hidden');
+  document.getElementById('view-favorites').classList.add('hidden');
+  document.getElementById('view-history').classList.remove('hidden');
+
+  renderHistoryList();
+}
+
+function renderHistoryList() {
+  const historyList = document.getElementById('history-list');
+  const emptyState = document.getElementById('history-empty');
+  historyList.innerHTML = '';
+
+  if (watchHistory.length === 0) {
+    emptyState.classList.remove('hidden');
+    return;
+  }
+
+  emptyState.classList.add('hidden');
+
+  watchHistory.forEach(match => {
+    const kickoff = new Date(match.kickoff.replace(' ', 'T') + '+07:00');
+
+    const timeString = kickoff.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+
+    const dateString = kickoff.toLocaleDateString([], {
+      day: 'numeric',
+      month: 'short'
+    });
+
+    const card = document.createElement('div');
+    card.className = 'match-card';
+
+    const matchId = getMatchId(match);
+    const isFavorite = favorites.includes(matchId);
+
+    card.innerHTML = `
+      <div>
+        <div id="status-hist-${matchId}"></div>
+        <h3>${match.tag}</h3>
+        <p>${match.league}</p>
+      </div>
+
+      <div>
+        <div class="local-time">📅 ${dateString} • 🕒 ${timeString}</div>
+        <div id="timer-hist-${matchId}" class="countdown-timer"></div>
+        <button class="bookmark-btn ${isFavorite ? 'active' : ''}" data-match-id="${matchId}">
+          ${isFavorite ? '❤️ Saved' : '🤍 Save'}
+        </button>
+      </div>
+    `;
+
+    const bookmarkBtn = card.querySelector('.bookmark-btn');
+    bookmarkBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFavorite(matchId, bookmarkBtn, match);
+    });
+
+    card.onclick = (e) => {
+      if (e.target.className.includes('bookmark-btn')) return;
+      openPlayer(match);
+    };
+
+    historyList.appendChild(card);
+
+    const kickoffTime = new Date(match.kickoff.replace(' ', 'T') + '+07:00');
+    updateTimerDisplay(
+      kickoffTime,
+      `timer-hist-${matchId}`,
+      `status-hist-${matchId}`
+    );
+  });
+
+  // Update timers for history
+  if (timerInterval) clearInterval(timerInterval);
+
+  timerInterval = setInterval(() => {
+    watchHistory.forEach(match => {
+      const matchId = getMatchId(match);
+      const timerElem = document.getElementById(`timer-hist-${matchId}`);
+      if (timerElem) {
+        const kickoff = new Date(match.kickoff.replace(' ', 'T') + '+07:00');
+        updateTimerDisplay(
+          kickoff,
+          `timer-hist-${matchId}`,
+          `status-hist-${matchId}`
+        );
+      }
+    });
+  }, 1000);
+}
+
+function openPlayer(match) {
+  document.getElementById('player-view').classList.remove('hidden');
+  document.getElementById('player-info').textContent = match.tag;
+
+  const selector = document.getElementById('server-selector');
+  const iframe = document.getElementById('stream-player');
+
+  selector.innerHTML = '';
+
+  if (!match.iframes || match.iframes.length === 0) {
+    iframe.src = '';
+    return;
+  }
+
+  function loadStream(url) {
+    iframe.src = 'about:blank';
+
+    setTimeout(() => {
+      iframe.src = url;
+    }, 150);
+  }
+
+  match.iframes.forEach((server, index) => {
+    const option = document.createElement('option');
+    option.value = server.url;
+    option.textContent = server.server || `Server ${index + 1}`;
+    selector.appendChild(option);
+  });
+
+  loadStream(match.iframes[0].url);
+
+  selector.onchange = function () {
+    loadStream(this.value);
+  };
+  
+  // Load and render chat messages
+  loadChatMessages();
+  
+  // Add Enter key listener to chat input
+  const chatInput = document.getElementById('chat-input');
+  if (chatInput) {
+    chatInput.onkeypress = function(e) {
+      if (e.key === 'Enter') {
+        sendChatMessage();
+      }
+    };
+  }
+}
+
+async function closePlayer() {
+  document.getElementById('player-view').classList.add('hidden');
+
+  const iframe = document.getElementById('stream-player');
+  iframe.src = 'about:blank';
+
+  document.getElementById('server-selector').innerHTML = '';
+  
+  // Stop listening to chat messages
+  if (currentChatListener && window.database) {
+    window.database.ref('chat/messages').off('value', currentChatListener);
+    currentChatListener = null;
+  }
+
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    }
+
+    if (screen.orientation && screen.orientation.unlock) {
+      screen.orientation.unlock();
+    }
+
+  } catch (e) {}
+}
+
+// Lock orientation ONLY when fullscreen button pressed manually
+document.addEventListener("fullscreenchange", async () => {
+  try {
+    if (document.fullscreenElement) {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock("landscape");
+      }
+    } else {
+      if (screen.orientation && screen.orientation.unlock) {
+        screen.orientation.unlock();
+      }
+    }
+  } catch (err) {
+    console.log("Orientation lock error:", err);
+  }
+});
+
+document.addEventListener("webkitfullscreenchange", async () => {
+  try {
+    if (document.webkitFullscreenElement) {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock("landscape");
+      }
+    } else {
+      if (screen.orientation && screen.orientation.unlock) {
+        screen.orientation.unlock();
+      }
+    }
+  } catch (err) {}
+});
+
+loadData();
+loadFavorites();
+loadHistory();
+setInterval(loadData, 30000);
+</script>
+
+</body>
+</html>
