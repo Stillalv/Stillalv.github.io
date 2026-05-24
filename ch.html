@@ -1,37 +1,415 @@
+
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iframe Embed</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #111;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>SportStream</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#0f172a;
+    color:white;
+    font-family:Arial,sans-serif;
+}
+
+header{
+    position:sticky;
+    top:0;
+    z-index:999;
+    background:#111827;
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    border-bottom:1px solid #1e293b;
+}
+
+.logo{
+    font-size:22px;
+    font-weight:bold;
+}
+
+.controls{
+    display:flex;
+    gap:10px;
+}
+
+select,input{
+    background:#1e293b;
+    border:none;
+    color:white;
+    padding:10px;
+    border-radius:10px;
+    outline:none;
+}
+
+main{
+    padding:20px;
+}
+
+.matches{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:#1e293b;
+    border-radius:16px;
+    overflow:hidden;
+    transition:0.3s;
+    border:1px solid transparent;
+}
+
+.card:hover{
+    transform:translateY(-4px);
+    border-color:#ef4444;
+}
+
+.poster{
+    width:100%;
+    height:180px;
+    object-fit:cover;
+    background:#111827;
+}
+
+.content{
+    padding:15px;
+}
+
+.title{
+    font-size:18px;
+    margin-bottom:10px;
+    line-height:1.4;
+}
+
+.info{
+    opacity:0.7;
+    margin-bottom:15px;
+    font-size:14px;
+}
+
+.live{
+    display:inline-block;
+    background:red;
+    color:white;
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:12px;
+    margin-bottom:10px;
+}
+
+button{
+    width:100%;
+    border:none;
+    background:#ef4444;
+    color:white;
+    padding:12px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:0.2s;
+}
+
+button:hover{
+    opacity:0.9;
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.92);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+    padding:20px;
+}
+
+.modal.active{
+    display:flex;
+}
+
+.player{
+    width:100%;
+    max-width:1200px;
+    position:relative;
+}
+
+iframe{
+    width:100%;
+    height:80vh;
+    border:none;
+    border-radius:16px;
+    background:black;
+}
+
+.close{
+    position:absolute;
+    top:-50px;
+    right:0;
+    width:auto;
+    padding:10px 14px;
+    background:red;
+}
+
+.loading{
+    text-align:center;
+    padding:50px;
+    opacity:0.7;
+}
+
+@media(max-width:700px){
+    header{
+        flex-direction:column;
+        align-items:stretch;
     }
 
-    iframe {
-      width: 90%;
-      max-width: 900px;
-      height: 500px;
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    .controls{
+        width:100%;
     }
-  </style>
+
+    select,input{
+        width:100%;
+    }
+
+    iframe{
+        height:60vh;
+    }
+}
+</style>
 </head>
+
 <body>
 
-  <iframe 
-    src="https://ntv.cx/embed?t=TVhpbmcyU0I1MVc3V3RtQm9STU1JRnllbnVSbkttVUtvZFcyNlNNSDJ3VnVMWjU4V3hHeDc3Mk5Nc2J5bjhLb0tPR3ZId0xRNFpXL2tPYS8zS0ZtdWphZDJZaTVxVVpDbmc4YjJZRmFLMStka2h4STV0aUI3OXBDbXMvZlhDTkdoR0JlZ2o0ODhkY3BZMjY5VjVOR1hRPT0~"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen>
-  </iframe>
+<header>
+    <div class="logo">⚽ SportStream</div>
+
+    <div class="controls">
+        <input type="text" id="search" placeholder="Search match..." />
+
+        <select id="sportSelect">
+            <option value="">All Sports</option>
+        </select>
+    </div>
+</header>
+
+<main>
+    <div id="matches" class="matches">
+        <div class="loading">Loading matches...</div>
+    </div>
+</main>
+
+<div id="modal" class="modal">
+    <div class="player">
+
+        <button class="close" onclick="closePlayer()">
+            ✕ Close
+        </button>
+
+        <iframe
+            id="frame"
+            allowfullscreen
+            scrolling="no">
+        </iframe>
+
+    </div>
+</div>
+
+<script>
+const API = "https://streamed.pk/api";
+
+const matchesContainer = document.getElementById("matches");
+const sportSelect = document.getElementById("sportSelect");
+const searchInput = document.getElementById("search");
+
+let allMatches = [];
+
+async function loadSports(){
+
+    try{
+
+        const res = await fetch(API + "/sports");
+        const sports = await res.json();
+
+        sports.forEach(sport=>{
+
+            const option = document.createElement("option");
+
+            option.value = sport.id;
+            option.textContent = sport.name;
+
+            sportSelect.appendChild(option);
+
+        });
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+async function loadMatches(sport=""){
+
+    matchesContainer.innerHTML =
+        '<div class="loading">Loading matches...</div>';
+
+    try{
+
+        let url = API + "/matches";
+
+        if(sport){
+            url += "?sport=" + sport;
+        }
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        allMatches = data;
+
+        renderMatches(data);
+
+    }catch(err){
+
+        console.log(err);
+
+        matchesContainer.innerHTML =
+            '<div class="loading">Failed loading matches</div>';
+
+    }
+
+}
+
+function renderMatches(matches){
+
+    matchesContainer.innerHTML = "";
+
+    if(matches.length === 0){
+
+        matchesContainer.innerHTML =
+            '<div class="loading">No matches found</div>';
+
+        return;
+    }
+
+    matches.forEach(match=>{
+
+        const card = document.createElement("div");
+
+        card.className = "card";
+
+        const image =
+            match.poster ||
+            match.image ||
+            "https://placehold.co/600x400/111827/FFFFFF?text=LIVE";
+
+        card.innerHTML = `
+            <img class="poster" src="${image}" />
+
+            <div class="content">
+
+                <div class="live">LIVE</div>
+
+                <div class="title">
+                    ${match.title || "Live Match"}
+                </div>
+
+                <div class="info">
+                    ${match.category || ""}
+                </div>
+
+                <button onclick="watchMatch('${match.id}')">
+                    WATCH NOW
+                </button>
+
+            </div>
+        `;
+
+        matchesContainer.appendChild(card);
+
+    });
+
+}
+
+async function watchMatch(id){
+
+    try{
+
+        const res = await fetch(API + "/streams/" + id);
+
+        const streams = await res.json();
+
+        if(!streams.length){
+
+            alert("No stream available");
+            return;
+
+        }
+
+        const stream =
+            streams[0].embed_url ||
+            streams[0].url;
+
+        document.getElementById("frame").src = stream;
+
+        document.getElementById("modal")
+            .classList.add("active");
+
+    }catch(err){
+
+        console.log(err);
+
+        alert("Stream failed");
+
+    }
+
+}
+
+function closePlayer(){
+
+    document.getElementById("modal")
+        .classList.remove("active");
+
+    document.getElementById("frame").src = "";
+
+}
+
+sportSelect.addEventListener("change",e=>{
+
+    loadMatches(e.target.value);
+
+});
+
+searchInput.addEventListener("input",e=>{
+
+    const value = e.target.value.toLowerCase();
+
+    const filtered = allMatches.filter(match=>
+
+        (match.title || "")
+        .toLowerCase()
+        .includes(value)
+
+    );
+
+    renderMatches(filtered);
+
+});
+
+loadSports();
+loadMatches();
+</script>
 
 </body>
 </html>
