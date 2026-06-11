@@ -310,7 +310,7 @@ let timerInterval = null;
 async function loadData() {
   try {
     const res = await fetch(
-      'https://api.embedsportex.site/api/streams?cache=' + Date.now()
+      'https://api.embedsportex.fun/api/streams?cache=' + Date.now()
     );
 
     sportsData = await res.json();
