@@ -4,9 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sports Stream Hub</title>
+  <title>SportsFlix - Live Sports Streaming</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- Iconify CDN for SVG Icons on demand -->
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
 
   <style>
     :root {
@@ -14,7 +17,8 @@
       --bg-color: #141414;
       --card-bg: #1f1f1f;
       --text-main: #ffffff;
-      --text-muted: #b3b3b3;
+      --text-muted: #aaaaaa;
+      --font-outfit: 'Outfit', sans-serif;
     }
 
     * {
@@ -29,103 +33,295 @@
       background: var(--bg-color);
       color: var(--text-main);
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    header {
-      position: sticky;
+    /* Sticky Netflix Transparent Header */
+    #main-header {
+      position: fixed;
       top: 0;
-      z-index: 100;
+      left: 0;
       width: 100%;
-      padding: 18px 4%;
-      background: rgba(20,20,20,0.96);
+      z-index: 100;
+      padding: 16px 4%;
+      background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+      transition: background-color 0.3s ease, border-bottom 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    #main-header.scrolled {
+      background-color: #141414;
       border-bottom: 1px solid rgba(255,255,255,0.05);
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: 800;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-outfit);
+      font-size: 1.6rem;
+      font-weight: 900;
       color: var(--netflix-red);
-      letter-spacing: 1px;
+      letter-spacing: -0.5px;
+      cursor: pointer;
     }
 
+    .header-logo iconify-icon {
+      font-size: 1.8rem;
+      color: var(--netflix-red);
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-item {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #e5e5e5;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    /* Main Container under Hero */
     .container {
-      max-width: 1400px;
-      margin: auto;
-      padding: 20px 4%;
+      max-width: 100%;
+      padding: 0 4% 80px 4%;
+      position: relative;
+      z-index: 2;
+      margin-top: -80px; /* pull rows up onto the hero image gradient */
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 14px;
-    }
-
-    @media (min-width: 768px) {
-      .grid {
-        grid-template-columns: repeat(4, minmax(0,1fr));
+    @media (max-width: 768px) {
+      .container {
+        margin-top: -40px;
+        padding-bottom: 60px;
       }
     }
 
-    .category-card {
-      background: linear-gradient(145deg, #2c2c2c, #171717);
-      border-radius: 16px;
-      padding: 30px 12px;
-      text-align: center;
-      cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.04);
-      transition: 0.2s;
+    /* Netflix Hero Banner */
+    #hero-banner {
+      position: relative;
+      width: 100%;
+      height: 70vh;
+      min-height: 480px;
+      display: flex;
+      align-items: flex-end;
+      padding: 0 4% 120px 4%;
+      background-color: #000;
     }
 
-    .category-card:active {
-      transform: scale(0.96);
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center 30%;
+      background-repeat: no-repeat;
+      transition: opacity 0.5s ease-in-out;
     }
 
-    .category-icon {
-      display: block;
-      font-size: 2.8rem;
-      margin-bottom: 10px;
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(0deg, #141414 0%, rgba(20,20,20,0.5) 50%, rgba(20,20,20,0) 100%),
+                  linear-gradient(90deg, #141414 0%, rgba(20,20,20,0.3) 50%, transparent 100%);
+      z-index: 1;
     }
 
-    .category-name {
-      font-size: 1rem;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .match-card {
-      background: var(--card-bg);
-      border-radius: 14px;
-      padding: 16px;
-      cursor: pointer;
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      min-height: 170px;
-      border: 1px solid rgba(255,255,255,0.03);
-      transition: 0.2s;
+      gap: 14px;
     }
 
-    .match-card:active {
-      transform: scale(0.98);
+    .hero-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .match-card h3 {
+    .hero-league {
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    .hero-title {
+      font-family: var(--font-outfit);
+      font-size: 3.2rem;
+      font-weight: 900;
+      line-height: 1.1;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+      letter-spacing: -1px;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.2rem;
+      }
+      #hero-banner {
+        height: 60vh;
+        padding-bottom: 80px;
+      }
+    }
+
+    .hero-time {
       font-size: 0.95rem;
-      font-weight: 700;
-      margin: 10px 0;
-      line-height: 1.4;
+      color: #ffcc00;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .match-card p {
+    .hero-time iconify-icon {
+      font-size: 1.1rem;
+    }
+
+    .hero-btn {
+      padding: 12px 28px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+
+    .watch-btn {
+      background-color: var(--netflix-red);
+      color: white;
+    }
+
+    .watch-btn:hover {
+      background-color: #ff1e27;
+      transform: scale(1.05);
+    }
+
+    /* Netflix Horizontal Rows */
+    .netflix-row {
+      margin-bottom: 35px;
+      position: relative;
+    }
+
+    .row-title {
+      font-family: var(--font-outfit);
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .row-title iconify-icon {
+      font-size: 1.5rem;
+      color: var(--netflix-red);
+    }
+
+    .row-cards-container {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      overflow-y: visible;
+      padding: 12px 0 25px 0;
+      scrollbar-width: none; /* Firefox */
+    }
+
+    .row-cards-container::-webkit-scrollbar {
+      display: none; /* Chrome/Safari */
+    }
+
+    /* Netflix-Style Hover Zoom Card */
+    .netflix-card {
+      position: relative;
+      flex: 0 0 290px;
+      aspect-ratio: 16 / 9;
+      background: var(--card-bg);
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    @media (max-width: 768px) {
+      .netflix-card {
+        flex: 0 0 220px;
+      }
+    }
+
+    .netflix-card:hover {
+      transform: scale(1.08);
+      z-index: 10;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .card-img-wrapper {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-img-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #2a2a2a 0%, #151515 100%);
+    }
+
+    .card-img-placeholder iconify-icon {
+      font-size: 3rem;
       color: var(--text-muted);
-      font-size: 0.78rem;
+      opacity: 0.3;
+    }
+
+    .card-badge-overlay {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 5;
     }
 
     .status-badge {
       display: inline-block;
       padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.7rem;
+      border-radius: 4px;
+      font-size: 0.68rem;
       font-weight: 800;
       text-transform: uppercase;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
     }
 
     .status-live {
@@ -135,32 +331,69 @@
     }
 
     .status-upcoming {
-      background: #444;
+      background: #333;
       color: #ccc;
     }
 
-    .countdown-timer {
-      margin-top: 10px;
+    .card-info-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(0deg, rgba(20,20,20,0.95) 0%, rgba(20,20,20,0.4) 60%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 12px;
+      transition: opacity 0.3s;
+    }
+
+    .card-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .card-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-time {
       font-family: 'JetBrains Mono', monospace;
       color: #ffcc00;
-      font-size: 0.8rem;
       font-weight: 600;
     }
 
-    .local-time {
-      margin-top: 6px;
-      color: var(--text-muted);
-      font-size: 0.75rem;
-    }
-
+    /* Back & Close Buttons */
     .back-btn {
-      background: #333;
+      background: rgba(255, 255, 255, 0.1);
       color: white;
-      border: none;
-      padding: 10px 14px;
-      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 10px 16px;
+      border-radius: 6px;
       cursor: pointer;
       font-weight: 700;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .back-btn iconify-icon {
+      font-size: 18px;
+      color: #ffffff;
     }
 
     .hidden {
@@ -173,6 +406,7 @@
       100% {opacity: 1;}
     }
 
+    /* Fullscreen Player Overlay */
     #player-view {
       position: fixed;
       inset: 0;
@@ -183,38 +417,193 @@
     }
 
     .player-header {
-      padding: 12px;
-      background: #141414;
+      padding: 14px 4%;
+      background: #0c0c0c;
       display: flex;
       align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      z-index: 10;
     }
 
     .player-title {
       flex: 1;
-      font-size: 0.9rem;
+      font-family: var(--font-outfit);
+      font-size: 1.05rem;
       font-weight: 700;
+      color: #ffffff;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    #server-selector {
-      background: #222;
-      color: white;
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 8px 12px;
-      border-radius: 8px;
+    .player-controls-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* 100% Custom Styled HTML Dropdown Menu (No native OS look) */
+    .custom-select {
+      position: relative;
+      display: inline-block;
+      user-select: none;
+      z-index: 15;
+    }
+
+    .select-trigger {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 8px 14px;
+      color: #ffffff;
       font-weight: 700;
-      max-width: 150px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .select-trigger:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .select-icon {
+      color: var(--netflix-red);
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .select-arrow {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    .custom-select.active .select-arrow {
+      transform: rotate(180deg);
+    }
+
+    .select-options-list {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      width: 100%;
+      min-width: 170px;
+      background: #181818;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
+      max-height: 250px;
+      overflow-y: auto;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .custom-select.active .select-options-list {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .select-option-item {
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #cccccc;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: left;
+    }
+
+    .select-option-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    .select-option-item.selected {
+      background: var(--netflix-red);
+      color: #ffffff;
+    }
+
+    /* Scrollbar for options list */
+    .select-options-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .select-options-list::-webkit-scrollbar-track {
+      background: #181818;
+    }
+    .select-options-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+    .select-options-list::-webkit-scrollbar-thumb:hover {
+      background: var(--netflix-red);
+    }
+
+    /* Premium Styled Action Buttons */
+    .player-action-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .player-action-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: scale(1.02);
+    }
+
+    .player-action-btn iconify-icon {
+      font-size: 1.1rem;
+      color: #ffffff;
+    }
+
+    /* Premium Dark Info/Tip Banner */
+    .player-banner {
+      background: rgba(229, 9, 20, 0.08);
+      border-bottom: 1px solid rgba(229, 9, 20, 0.15);
+      padding: 10px 4%;
+      font-size: 0.8rem;
+      color: #ff858a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    .player-banner iconify-icon {
+      font-size: 1.15rem;
+      color: var(--netflix-red);
+      flex-shrink: 0;
     }
 
     .video-wrapper {
       width: 100%;
-      aspect-ratio: 16 / 9;
+      flex: 1;
       background: black;
-      max-height: 60vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     #stream-player {
@@ -223,57 +612,116 @@
       border: none;
     }
 
-    #player-view:fullscreen .video-wrapper,
-    #player-view:-webkit-full-screen .video-wrapper {
-      width: 100vw;
-      height: 100vh;
-      max-height: 100vh;
-      aspect-ratio: auto;
-    }
-
-    #player-view:fullscreen iframe,
-    #player-view:-webkit-full-screen iframe {
-      width: 100%;
-      height: 100%;
+    /* General Loader */
+    #loading {
+      text-align: center;
+      padding: 100px 4%;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-muted);
     }
 
     @media (max-width: 768px) {
-      .video-wrapper {
-        max-height: 40vh;
+      .player-header {
+        padding: 8px 4%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
       }
-
-      #server-selector {
+      .player-controls-right {
+        justify-content: space-between;
         width: 100%;
-        max-width: 100%;
+        gap: 12px;
+      }
+      .custom-select, .player-action-btn {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+      }
+      .select-trigger {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .select-options-list {
+        width: 100%;
       }
     }
   </style>
 </head>
 <body>
 
-<header>SPORTSFLIX</header>
+<!-- Transparent Sticky Header -->
+<header id="main-header">
+  <div class="header-logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+    <iconify-icon icon="mdi:television-play"></iconify-icon>
+    <span>SPORTSFLIX</span>
+  </div>
+  <div class="header-nav">
+    <span class="nav-item active">Home</span>
+    <span class="nav-item">Live</span>
+    <span class="nav-item">Schedule</span>
+  </div>
+</header>
+
+<!-- Featured Match Hero Banner -->
+<div id="hero-banner" class="hidden">
+  <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge-row">
+      <div id="hero-status"></div>
+      <div class="hero-league" id="hero-league"></div>
+    </div>
+    <h1 class="hero-title" id="hero-title"></h1>
+    <div class="hero-time" id="hero-time"></div>
+    <div class="hero-buttons">
+      <button class="hero-btn watch-btn" id="hero-watch-btn">
+        <iconify-icon icon="mdi:play"></iconify-icon> Watch Now
+      </button>
+    </div>
+  </div>
+</div>
 
 <div class="container">
 
-  <div id="view-categories">
-    <h2 style="margin-bottom:20px;">Choose Sport</h2>
-    <div id="loading" style="text-align:center; padding:50px;">Connecting...</div>
-    <div class="grid" id="category-list"></div>
-  </div>
-
-  <div id="view-matches" class="hidden">
-    <button class="back-btn" onclick="showCategories()">← Back</button>
-    <h2 id="match-title-text" style="margin:20px 0;"></h2>
-    <div class="grid" id="match-list"></div>
+  <!-- View: Dashboard / Categories Rows -->
+  <div id="view-dashboard">
+    <div id="loading">Connecting to Sportsflix Network...</div>
+    <div id="rows-container"></div>
   </div>
 
 </div>
 
+<!-- Fullscreen Player Overlay -->
 <div id="player-view" class="hidden">
   <div class="player-header">
-    <button class="back-btn" onclick="closePlayer()">← Close</button>
+    <button class="back-btn" onclick="closePlayer()">
+      <iconify-icon icon="mdi:arrow-left"></iconify-icon>Back
+    </button>
     <div id="player-info" class="player-title"></div>
-    <select id="server-selector"></select>
+    
+    <div class="player-controls-right">
+      <!-- Custom HTML-Styled Dropdown -->
+      <div class="custom-select" id="custom-server-select">
+        <div class="select-trigger" onclick="toggleSelect(event)">
+          <iconify-icon icon="mdi:server-network" class="select-icon"></iconify-icon>
+          <span id="selected-server-text">Loading...</span>
+          <iconify-icon icon="mdi:chevron-down" class="select-arrow"></iconify-icon>
+        </div>
+        <div class="select-options-list" id="select-options-list"></div>
+      </div>
+      
+      <!-- New Tab Action Button -->
+      <button class="player-action-btn" id="player-external-btn">
+        <iconify-icon icon="mdi:open-in-new"></iconify-icon>New Tab
+      </button>
+    </div>
+  </div>
+  
+  <!-- Info tip banner -->
+  <div class="player-banner">
+    <iconify-icon icon="mdi:information-outline"></iconify-icon>
+    <span>Tip: If the video is blank or fails to play, try switching the <strong>Server</strong> or click <strong>New Tab</strong>.</span>
   </div>
 
   <div class="video-wrapper">
@@ -283,29 +731,67 @@
       webkitallowfullscreen
       mozallowfullscreen
       allow="encrypted-media; picture-in-picture; fullscreen"
-      sandbox="allow-scripts allow-same-origin allow-fullscreen"
       referrerpolicy="no-referrer">
     </iframe>
   </div>
 </div>
 
 <script>
+// Iconify/Material Design Icons Mapping for Sports (No emojis)
 const sportIcons = {
-  football: '⚽',
-  basketball: '🏀',
-  amfootball: '🏈',
-  baseball: '⚾',
-  badminton: '🏸',
-  volleyball: '🏐',
-  tennis: '🎾',
-  race: '🏁',
-  fight: '🥊',
-  other: '🎯'
+  football: 'mdi:soccer',
+  basketball: 'mdi:basketball',
+  amfootball: 'mdi:football',
+  baseball: 'mdi:baseball',
+  badminton: 'mdi:badminton',
+  volleyball: 'mdi:volleyball',
+  tennis: 'mdi:tennis',
+  race: 'mdi:flag-checkered',
+  fight: 'mdi:boxing-glove',
+  other: 'mdi:target'
 };
 
 let sportsData = {};
-let currentOpenSport = null;
 let timerInterval = null;
+let isInternalNavigation = false;
+let allMatches = []; // Flat list of all matches for index mapping
+
+// Header scroll color change
+window.addEventListener('scroll', () => {
+  const header = document.getElementById('main-header');
+  if (window.scrollY > 50) {
+    header.classList.add('scrolled');
+  } else {
+    header.classList.remove('scrolled');
+  }
+});
+
+// Toggle custom dropdown
+function toggleSelect(event) {
+  event.stopPropagation();
+  const select = document.getElementById('custom-server-select');
+  select.classList.toggle('active');
+}
+
+// Close custom dropdown when clicking outside
+document.addEventListener('click', () => {
+  const select = document.getElementById('custom-server-select');
+  if (select) {
+    select.classList.remove('active');
+  }
+});
+
+// Anti Frame-Busting Redirect Interceptor
+window.addEventListener('beforeunload', function (e) {
+  if (isInternalNavigation) return;
+  
+  const playerView = document.getElementById('player-view');
+  if (playerView && !playerView.classList.contains('hidden')) {
+    e.preventDefault();
+    e.returnValue = 'Preventing automatic redirect ad.';
+    return 'Preventing automatic redirect ad.';
+  }
+});
 
 async function loadData() {
   try {
@@ -317,156 +803,211 @@ async function loadData() {
 
     document.getElementById('loading').classList.add('hidden');
 
-    renderCategoryMenu();
-
-    if (currentOpenSport) {
-      renderMatchList(currentOpenSport);
-    }
+    buildFlatMatchesList();
+    renderHeroBanner();
+    renderNetflixRows();
 
   } catch (e) {
     console.error("API Error", e);
   }
 }
 
-function renderCategoryMenu() {
-  const list = document.getElementById('category-list');
-  list.innerHTML = '';
-
+// Flat list of matches with category context
+function buildFlatMatchesList() {
+  allMatches = [];
   Object.keys(sportsData).forEach(sport => {
-    if (Array.isArray(sportsData[sport]) && sportsData[sport].length > 0) {
-      const card = document.createElement('div');
-      card.className = 'category-card';
-
-      card.innerHTML = `
-        <span class="category-icon">${sportIcons[sport] || '🎯'}</span>
-        <span class="category-name">${sport}</span>
-      `;
-
-      card.onclick = () => renderMatchList(sport);
-
-      list.appendChild(card);
+    if (Array.isArray(sportsData[sport])) {
+      sportsData[sport].forEach(match => {
+        allMatches.push({ ...match, category: sport });
+      });
     }
   });
 }
 
-function renderMatchList(sport) {
-  currentOpenSport = sport;
+function renderHeroBanner() {
+  const heroBanner = document.getElementById('hero-banner');
+  
+  if (allMatches.length === 0) {
+    heroBanner.classList.add('hidden');
+    return;
+  }
 
-  document.getElementById('view-categories').classList.add('hidden');
-  document.getElementById('view-matches').classList.remove('hidden');
-
-  document.getElementById('match-title-text').innerHTML =
-    `${sportIcons[sport] || ''} ${sport} Schedule`;
-
-  const list = document.getElementById('match-list');
-  list.innerHTML = '';
-
-  sportsData[sport].forEach((match, index) => {
-    const kickoff = new Date(match.kickoff.replace(' ', 'T') + '+07:00');
-
-    const timeString = kickoff.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
-
-    const dateString = kickoff.toLocaleDateString([], {
-      day: 'numeric',
-      month: 'short'
-    });
-
-    const card = document.createElement('div');
-    card.className = 'match-card';
-
-    card.innerHTML = `
-      <div>
-        <div id="status-${sport}-${index}"></div>
-        <h3>${match.tag}</h3>
-        <p>${match.league}</p>
-      </div>
-
-      <div>
-        <div class="local-time">📅 ${dateString} • 🕒 ${timeString}</div>
-        <div id="timer-${sport}-${index}" class="countdown-timer"></div>
-      </div>
-    `;
-
-    card.onclick = () => openPlayer(match);
-
-    list.appendChild(card);
-
-    updateTimerDisplay(
-      kickoff,
-      `timer-${sport}-${index}`,
-      `status-${sport}-${index}`
-    );
+  // Find first live match, or fallback to the first upcoming match
+  let featuredMatch = allMatches.find(m => {
+    const kickoff = new Date(m.kickoff.replace(' ', 'T') + '+07:00');
+    return (kickoff - new Date()) <= 0;
   });
 
+  if (!featuredMatch) {
+    featuredMatch = allMatches[0];
+  }
+
+  const kickoff = new Date(featuredMatch.kickoff.replace(' ', 'T') + '+07:00');
+  const now = new Date();
+  
+  // Set backgrounds and titles
+  document.getElementById('hero-bg').style.backgroundImage = featuredMatch.poster 
+    ? `url('${featuredMatch.poster}')`
+    : `linear-gradient(135deg, #1f212a 0%, #0e0f14 100%)`;
+    
+  document.getElementById('hero-title').textContent = featuredMatch.tag;
+  document.getElementById('hero-league').textContent = featuredMatch.league || 'FEATURED MATCH';
+  
+  // Status Badge
+  const statusBadge = document.getElementById('hero-status');
+  if (kickoff - now <= 0) {
+    statusBadge.innerHTML = `<span class="status-badge status-live">LIVE</span>`;
+  } else {
+    statusBadge.innerHTML = `<span class="status-badge status-upcoming">UPCOMING</span>`;
+  }
+
+  // Date and Time
+  const timeString = kickoff.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  const dateString = kickoff.toLocaleDateString([], { day: 'numeric', month: 'short' });
+  document.getElementById('hero-time').innerHTML = `<iconify-icon icon="mdi:calendar-clock"></iconify-icon> ${dateString} • ${timeString}`;
+
+  // Find index in flat list to open player
+  const matchIndex = allMatches.findIndex(m => m.tag === featuredMatch.tag && m.kickoff === featuredMatch.kickoff);
+  
+  document.getElementById('hero-watch-btn').onclick = () => {
+    openPlayerByIndex(matchIndex);
+  };
+
+  heroBanner.classList.remove('hidden');
+}
+
+function renderNetflixRows() {
+  const container = document.getElementById('rows-container');
+  container.innerHTML = '';
+
+  let globalMatchIndex = 0;
+
+  Object.keys(sportsData).forEach(sport => {
+    if (Array.isArray(sportsData[sport]) && sportsData[sport].length > 0) {
+      
+      const row = document.createElement('div');
+      row.className = 'netflix-row';
+
+      const iconName = sportIcons[sport] || 'mdi:target';
+      row.innerHTML = `
+        <h3 class="row-title">
+          <iconify-icon icon="${iconName}"></iconify-icon>
+          ${sport}
+        </h3>
+        <div class="row-cards-container" id="row-cards-${sport}"></div>
+      `;
+
+      container.appendChild(row);
+
+      const cardsContainer = document.getElementById(`row-cards-${sport}`);
+
+      sportsData[sport].forEach((match) => {
+        const currentIdx = globalMatchIndex;
+        globalMatchIndex++;
+
+        const kickoff = new Date(match.kickoff.replace(' ', 'T') + '+07:00');
+        const timeString = kickoff.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+
+        const card = document.createElement('div');
+        card.className = 'netflix-card';
+        card.onclick = () => openPlayerByIndex(currentIdx);
+
+        const posterHTML = match.poster 
+          ? `<img class="card-img" src="${match.poster}" alt="${match.tag}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+             <div class="card-img-placeholder" style="display:none;"><iconify-icon icon="${sportIcons[sport] || 'mdi:target'}"></iconify-icon></div>`
+          : `<div class="card-img-placeholder"><iconify-icon icon="${sportIcons[sport] || 'mdi:target'}"></iconify-icon></div>`;
+
+        card.innerHTML = `
+          <div class="card-img-wrapper">
+            <div class="card-badge-overlay" id="badge-${sport}-${currentIdx}"></div>
+            ${posterHTML}
+            <div class="card-info-overlay">
+              <h4 class="card-title">${match.tag}</h4>
+              <div class="card-sub">
+                <span>${match.league}</span>
+                <span class="card-time" id="time-${sport}-${currentIdx}">${timeString}</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        cardsContainer.appendChild(card);
+        
+        updateCardBadge(kickoff, `badge-${sport}-${currentIdx}`, `time-${sport}-${currentIdx}`);
+      });
+    }
+  });
+
+  // Start Interval for card status polling
   if (timerInterval) clearInterval(timerInterval);
 
   timerInterval = setInterval(() => {
-    sportsData[sport].forEach((match, index) => {
-      const kickoff = new Date(match.kickoff.replace(' ', 'T') + '+07:00');
-
-      updateTimerDisplay(
-        kickoff,
-        `timer-${sport}-${index}`,
-        `status-${sport}-${index}`
-      );
+    let loopIdx = 0;
+    Object.keys(sportsData).forEach(sport => {
+      if (Array.isArray(sportsData[sport])) {
+        sportsData[sport].forEach(match => {
+          const currentIdx = loopIdx;
+          loopIdx++;
+          const kickoff = new Date(match.kickoff.replace(' ', 'T') + '+07:00');
+          updateCardBadge(kickoff, `badge-${sport}-${currentIdx}`, `time-${sport}-${currentIdx}`);
+        });
+      }
     });
-  }, 1000);
+  }, 10000);
 }
 
-function updateTimerDisplay(targetDate, timerId, statusId) {
-  const timerElem = document.getElementById(timerId);
-  const statusElem = document.getElementById(statusId);
+function updateCardBadge(targetDate, badgeId, timeId) {
+  const badgeElem = document.getElementById(badgeId);
+  const timeElem = document.getElementById(timeId);
 
-  if (!timerElem || !statusElem) return;
+  if (!badgeElem) return;
 
   const now = new Date();
   const diff = targetDate - now;
 
   if (diff <= 0) {
-    statusElem.innerHTML =
-      `<span class="status-badge status-live">LIVE</span>`;
-
-    timerElem.innerHTML = `NOW LIVE`;
-    timerElem.style.color = "#22c55e";
-
+    badgeElem.innerHTML = `<span class="status-badge status-live">LIVE</span>`;
+    if (timeElem) {
+      timeElem.innerHTML = `🔴 LIVE`;
+      timeElem.style.color = "#ef4444";
+    }
   } else {
-    statusElem.innerHTML =
-      `<span class="status-badge status-upcoming">UPCOMING</span>`;
-
-    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const m = Math.floor((diff / (1000 * 60)) % 60);
-    const s = Math.floor((diff / 1000) % 60);
-
-    timerElem.innerHTML =
-      `${d}d : ${h}h : ${m}m : ${s}s`;
+    badgeElem.innerHTML = `<span class="status-badge status-upcoming">UPCOMING</span>`;
+    if (timeElem) {
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((diff / (1000 * 60)) % 60);
+      
+      let timerText = '';
+      if (d > 0) {
+        timerText = `${d}d ${h}h`;
+      } else if (h > 0) {
+        timerText = `${h}h ${m}m`;
+      } else {
+        timerText = `${m}m`;
+      }
+      
+      timeElem.innerHTML = `⏳ ${timerText}`;
+      timeElem.style.color = "#ffcc00";
+    }
   }
 }
 
-function showCategories() {
-  currentOpenSport = null;
+function openPlayerByIndex(index) {
+  const match = allMatches[index];
+  if (!match) return;
 
-  if (timerInterval) clearInterval(timerInterval);
-
-  document.getElementById('view-matches').classList.add('hidden');
-  document.getElementById('view-categories').classList.remove('hidden');
-}
-
-function openPlayer(match) {
   document.getElementById('player-view').classList.remove('hidden');
   document.getElementById('player-info').textContent = match.tag;
 
-  const selector = document.getElementById('server-selector');
   const iframe = document.getElementById('stream-player');
-
-  selector.innerHTML = '';
+  const listContainer = document.getElementById('select-options-list');
+  
+  listContainer.innerHTML = '';
 
   if (!match.iframes || match.iframes.length === 0) {
     iframe.src = '';
+    document.getElementById('selected-server-text').textContent = 'No Servers';
     return;
   }
 
@@ -476,29 +1017,52 @@ function openPlayer(match) {
     setTimeout(() => {
       iframe.src = url;
     }, 150);
+
+    // Set the click action of the external link button
+    const extBtn = document.getElementById('player-external-btn');
+    if (extBtn) {
+      extBtn.onclick = () => {
+        window.open(url, '_blank');
+      };
+    }
   }
 
-  match.iframes.forEach((server, index) => {
-    const option = document.createElement('option');
-    option.value = server.url;
-    option.textContent = server.server || `Server ${index + 1}`;
-    selector.appendChild(option);
+  // Populate Custom HTML Dropdown Options
+  match.iframes.forEach((server, idx) => {
+    const item = document.createElement('div');
+    item.className = 'select-option-item' + (idx === 0 ? ' selected' : '');
+    item.textContent = server.server || `Server ${idx + 1}`;
+    
+    item.onclick = function(e) {
+      e.stopPropagation(); // prevent immediate toggle trigger closing
+      
+      // Update UI selection states
+      document.querySelectorAll('.select-option-item').forEach(el => el.classList.remove('selected'));
+      item.classList.add('selected');
+      document.getElementById('selected-server-text').textContent = item.textContent;
+      document.getElementById('custom-server-select').classList.remove('active');
+      
+      // Load corresponding stream
+      loadStream(server.url);
+    };
+    
+    listContainer.appendChild(item);
   });
 
+  // Set default active trigger text
+  document.getElementById('selected-server-text').textContent = match.iframes[0].server || 'Server 1';
   loadStream(match.iframes[0].url);
-
-  selector.onchange = function () {
-    loadStream(this.value);
-  };
 }
 
 async function closePlayer() {
+  isInternalNavigation = true;
   document.getElementById('player-view').classList.add('hidden');
 
   const iframe = document.getElementById('stream-player');
   iframe.src = 'about:blank';
 
-  document.getElementById('server-selector').innerHTML = '';
+  document.getElementById('select-options-list').innerHTML = '';
+  document.getElementById('selected-server-text').textContent = 'Loading...';
 
   try {
     if (document.fullscreenElement) {
@@ -510,6 +1074,10 @@ async function closePlayer() {
     }
 
   } catch (e) {}
+
+  setTimeout(() => {
+    isInternalNavigation = false;
+  }, 100);
 }
 
 // Lock orientation ONLY when fullscreen button pressed manually
@@ -544,7 +1112,8 @@ document.addEventListener("webkitfullscreenchange", async () => {
 });
 
 loadData();
-setInterval(loadData, 30000);
+// Periodically fetch new stream links every 60 seconds
+setInterval(loadData, 60000);
 </script>
 
 </body>
